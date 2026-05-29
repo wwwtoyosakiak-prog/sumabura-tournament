@@ -187,7 +187,25 @@ input{
   font-weight:900;
 }
 
-input:focus{
+textarea,select{
+  width:100%;
+  min-height:54px;
+  padding:12px 14px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.2);
+  background:#09090d;
+  color:var(--text);
+  font-size:16px;
+  font-weight:900;
+}
+
+textarea{
+  min-height:96px;
+  resize:vertical;
+  line-height:1.6;
+}
+
+input:focus,textarea:focus,select:focus{
   outline:2px solid rgba(244,196,78,.55);
   outline-offset:2px;
   border-color:var(--gold);
@@ -197,6 +215,13 @@ input:focus{
   min-height:78px;
   font-size:38px;
   text-align:center;
+}
+
+.start-actions{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  margin-top:16px;
 }
 
 .btn{
@@ -237,6 +262,157 @@ input:focus{
   background:rgba(227,59,50,.14);
   border:1px solid rgba(227,59,50,.45);
   font-weight:900;
+}
+
+.rule-hero{
+  display:grid;
+  grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);
+  gap:16px;
+  margin-bottom:16px;
+}
+
+.rule-title{
+  margin-top:12px;
+  font-size:clamp(30px,5vw,48px);
+  line-height:1.1;
+}
+
+.rule-meta{
+  display:grid;
+  gap:10px;
+}
+
+.rule-meta-item{
+  padding:12px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.05);
+}
+
+.rule-meta-item span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+}
+
+.rule-meta-item strong{
+  display:block;
+  margin-top:5px;
+  color:#fff7dc;
+  font-size:16px;
+  line-height:1.45;
+}
+
+.rule-section-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+}
+
+.rule-card{
+  padding:18px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.11);
+  background:rgba(255,255,255,.045);
+}
+
+.rule-card h3{
+  color:var(--gold-2);
+  font-size:17px;
+  margin-bottom:12px;
+}
+
+.rule-list{
+  display:grid;
+  gap:9px;
+  list-style:none;
+}
+
+.rule-list li{
+  position:relative;
+  padding:10px 10px 10px 28px;
+  border-radius:8px;
+  color:#fff8e8;
+  background:rgba(0,0,0,.18);
+  border:1px solid rgba(255,255,255,.08);
+  line-height:1.55;
+  font-weight:900;
+}
+
+.rule-list li::before{
+  content:"";
+  position:absolute;
+  left:11px;
+  top:18px;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--gold);
+  box-shadow:0 0 12px rgba(244,196,78,.45);
+}
+
+.rule-empty{
+  color:var(--muted);
+  font-weight:900;
+  line-height:1.6;
+}
+
+.admin-panel{
+  display:none;
+  margin-top:16px;
+  padding:20px;
+}
+
+.admin-panel.active{
+  display:block;
+  animation:fadeUp .25s ease both;
+}
+
+.admin-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.admin-field.full{
+  grid-column:1 / -1;
+}
+
+.edit-list{
+  display:grid;
+  gap:8px;
+  margin-top:10px;
+}
+
+.edit-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
+}
+
+.edit-row input{
+  min-height:44px;
+  font-size:15px;
+}
+
+.delete-rule{
+  min-height:44px;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  color:#fff;
+  background:rgba(227,59,50,.22);
+  border:1px solid rgba(227,59,50,.45);
+  font-weight:900;
+}
+
+.add-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  margin-top:10px;
 }
 
 .layout{
@@ -451,10 +627,10 @@ input:focus{
 
 .zoom-mode .bracket-panel{
   position:fixed;
-  inset:14px;
+  inset:8px;
   z-index:40;
   overflow:hidden;
-  padding:24px;
+  padding:16px;
   border-color:rgba(244,196,78,.45);
   background:
     radial-gradient(circle at 18% 8%,rgba(227,59,50,.18),transparent 34%),
@@ -470,47 +646,311 @@ input:focus{
   position:sticky;
   top:0;
   z-index:8;
-  padding-bottom:14px;
+  margin-bottom:10px;
+  padding-bottom:10px;
   background:linear-gradient(180deg,rgba(18,18,23,.98),rgba(18,18,23,.78));
   backdrop-filter:blur(10px);
 }
 
-.zoom-mode .bracket-scroll{
-  height:calc(100vh - 150px);
-  overflow:hidden;
-  padding:12px 0;
+.zoom-mode .round-title h2{
+  font-size:22px;
+}
+
+.zoom-mode #roundNote{
+  display:none;
+}
+
+.zoom-mode .round-tools .btn{
+  min-height:40px;
+  padding:8px 12px;
+  font-size:13px;
+}
+
+.zoom-view-toggle{
+  display:none;
+  gap:6px;
+  padding:4px;
+  border-radius:8px;
+  border:1px solid rgba(244,196,78,.28);
+  background:rgba(0,0,0,.22);
+}
+
+.zoom-mode .zoom-view-toggle{
+  display:flex;
+}
+
+.zoom-view-toggle .btn{
+  box-shadow:none;
+}
+
+.zoom-list-view #zoomListViewBtn,
+.zoom-bracket-view #zoomBracketViewBtn,
+.zoom-overview-view #zoomOverviewViewBtn{
+  color:#140a00;
+  background:linear-gradient(135deg,var(--gold),#fff0b6);
+}
+
+.zoom-mode.zoom-list-view .bracket-scroll{
+  height:calc(100vh - 106px);
+  overflow:auto;
+  padding:6px 0 18px;
+  display:block;
+}
+
+.zoom-mode.zoom-list-view .bracket-canvas{
+  width:100% !important;
+  height:auto !important;
+  min-width:0;
+  transform:none !important;
+}
+
+.zoom-mode.zoom-list-view .bracket{
+  display:grid;
+  grid-auto-flow:row;
+  grid-auto-columns:auto;
+  grid-template-columns:1fr;
+  gap:16px;
+  min-width:0;
+  width:100%;
+  padding:8px 4px 26px;
+}
+
+.zoom-mode.zoom-list-view .round-col{
+  min-width:0;
+  width:100%;
+}
+
+.zoom-mode.zoom-list-view .round-col h3{
+  margin-bottom:8px;
+  padding:8px 10px;
+  border-radius:8px;
+  color:#140a00;
+  background:linear-gradient(135deg,var(--gold),#fff0b6);
+  font-size:15px;
+}
+
+.zoom-mode.zoom-list-view .round-matches,
+.zoom-mode.zoom-list-view .round-matches.arranged{
+  display:grid !important;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:10px;
+  min-height:0 !important;
+}
+
+.zoom-mode.zoom-list-view .round-matches.arranged .match{
+  position:relative !important;
+  top:auto !important;
+  left:auto;
+  right:auto;
+}
+
+.zoom-mode .match{
+  border-radius:7px;
+}
+
+.zoom-mode .slot{
+  min-height:48px;
+  padding:8px 10px;
+  font-size:15px;
+}
+
+.zoom-mode .slot .status{
+  font-size:11px;
+}
+
+.zoom-mode .slot .player-name{
+  gap:6px;
+}
+
+.zoom-mode .slot .player-name::before{
+  width:8px;
+  height:8px;
+}
+
+.zoom-mode .match-head{
+  padding:6px 10px;
+  font-size:11px;
+}
+
+.zoom-mode .champion-slot{
+  min-height:74px;
+}
+
+.zoom-mode .champion-slot .player-name{
+  font-size:18px;
+}
+
+.zoom-mode .bracket-lines{
+  display:none;
+}
+
+.zoom-mode.zoom-bracket-view .bracket-scroll{
   display:flex;
   align-items:flex-start;
   justify-content:flex-start;
 }
 
-.zoom-mode .bracket-canvas{
-  transform-origin:top left;
+.zoom-mode.zoom-bracket-view .bracket-canvas{
+  width:auto !important;
+  height:auto !important;
+  min-width:100%;
+}
+
+.zoom-mode.zoom-bracket-view .bracket{
+  grid-auto-flow:column;
+  grid-auto-columns:276px;
+  grid-template-columns:none;
+  align-items:start;
+  column-gap:86px;
+  row-gap:0;
+  min-width:max-content;
+  width:auto;
+  padding:8px 34px 26px;
+}
+
+.zoom-mode.zoom-bracket-view .round-col{
+  min-width:276px;
+  width:auto;
+}
+
+.zoom-mode.zoom-bracket-view .round-col h3{
+  color:#fff0b6;
+  background:none;
+  padding:0;
+  border-radius:0;
+}
+
+.zoom-mode.zoom-bracket-view .round-matches{
+  display:grid !important;
+  grid-template-columns:1fr;
+  gap:8px;
+}
+
+.zoom-mode.zoom-bracket-view .round-matches.arranged{
+  display:block !important;
+}
+
+.zoom-mode.zoom-bracket-view .round-matches.arranged .match{
+  position:absolute !important;
+  left:0;
+  right:0;
+}
+
+.zoom-mode.zoom-bracket-view .bracket-lines{
+  display:block;
+}
+
+.zoom-mode.zoom-overview-view .bracket-scroll{
+  height:calc(100vh - 106px);
+  overflow:hidden;
+  padding:4px 0;
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+}
+
+.zoom-mode.zoom-overview-view .bracket-canvas{
+  width:auto;
+  height:auto;
+  min-width:0;
   flex:0 0 auto;
+  transform-origin:top left;
 }
 
-.zoom-mode .bracket{
-  grid-auto-columns:340px;
-  column-gap:128px;
-  padding:16px 48px 36px;
+.zoom-mode.zoom-overview-view .bracket{
+  grid-auto-flow:column;
+  grid-auto-columns:132px;
+  grid-template-columns:none;
+  align-items:start;
+  column-gap:24px;
+  row-gap:0;
+  min-width:max-content;
+  width:auto;
+  padding:4px 12px 10px;
 }
 
-.zoom-mode .round-col{
-  min-width:340px;
+.zoom-mode.zoom-overview-view .round-col{
+  min-width:132px;
+  width:auto;
 }
 
-.zoom-mode .slot{
-  min-height:76px;
-  font-size:18px;
+.zoom-mode.zoom-overview-view .round-col h3{
+  margin-bottom:4px;
+  color:#fff0b6;
+  background:none;
+  padding:0;
+  border-radius:0;
+  font-size:11px;
 }
 
-.zoom-mode .slot .status{
-  font-size:13px;
+.zoom-mode.zoom-overview-view .round-matches{
+  display:grid !important;
+  grid-template-columns:1fr;
+  gap:4px;
 }
 
-.zoom-mode .match-head{
-  padding:12px 16px;
-  font-size:13px;
+.zoom-mode.zoom-overview-view .round-matches.arranged{
+  display:block !important;
+}
+
+.zoom-mode.zoom-overview-view .round-matches.arranged .match{
+  position:absolute !important;
+  left:0;
+  right:0;
+}
+
+.zoom-mode.zoom-overview-view .match{
+  border-radius:5px;
+}
+
+.zoom-mode.zoom-overview-view .match-head{
+  display:none;
+}
+
+.zoom-mode.zoom-overview-view .slot{
+  min-height:13px;
+  padding:1px 4px;
+  gap:3px;
+  font-size:8px;
+  border-left-width:2px;
+}
+
+.zoom-mode.zoom-overview-view .slot .status{
+  display:none;
+}
+
+.zoom-mode.zoom-overview-view .slot .player-name{
+  gap:4px;
+  white-space:nowrap;
+}
+
+.zoom-mode.zoom-overview-view .slot .player-name::before{
+  width:5px;
+  height:5px;
+}
+
+.zoom-mode.zoom-overview-view .champion-slot{
+  min-height:28px;
+}
+
+.zoom-mode.zoom-overview-view .champion-slot .player-name{
+  font-size:10px;
+}
+
+.zoom-mode.zoom-overview-view .sep{
+  opacity:.45;
+}
+
+.zoom-mode.zoom-overview-view .bracket-lines{
+  display:block;
+}
+
+.zoom-mode.zoom-overview-view .bracket-line{
+  stroke-width:2.4;
+}
+
+.zoom-mode.zoom-overview-view .bracket-line.active{
+  stroke-width:4.2;
 }
 
 .zoom-mode .bracket-line{
@@ -635,6 +1075,10 @@ input:focus{
   color:#fff9e8;
   background:linear-gradient(90deg,rgba(244,196,78,.26),rgba(227,59,50,.12));
   box-shadow:inset 0 0 0 1px rgba(244,196,78,.25);
+}
+
+.slot.win.flash{
+  animation:winnerPulse .55s ease both;
 }
 
 .slot.win .player-name{
@@ -803,6 +1247,225 @@ input:focus{
   white-space:nowrap;
 }
 
+.scroll-hint{
+  display:none;
+  margin:-8px 0 12px;
+  color:#ffe29a;
+  font-size:13px;
+  font-weight:900;
+}
+
+.save-status{
+  margin-top:12px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+}
+
+.toolbar-save-status{
+  flex-basis:100%;
+  margin-top:0;
+  text-align:right;
+}
+
+.broadcast-panel{
+  display:none;
+  margin-top:16px;
+  padding:18px;
+  border-radius:8px;
+  border:1px solid rgba(244,196,78,.28);
+  background:
+    radial-gradient(circle at 12% 12%,rgba(227,59,50,.2),transparent 34%),
+    radial-gradient(circle at 88% 18%,rgba(244,196,78,.2),transparent 32%),
+    linear-gradient(135deg,rgba(10,10,13,.98),rgba(28,10,10,.94));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 18px 48px rgba(0,0,0,.34);
+}
+
+.broadcast-panel.active{
+  display:block;
+}
+
+.broadcast-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.broadcast-live{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-height:28px;
+  padding:6px 10px;
+  border-radius:999px;
+  color:#fff;
+  background:rgba(227,59,50,.22);
+  border:1px solid rgba(227,59,50,.5);
+  font-size:12px;
+  font-weight:900;
+}
+
+.broadcast-live::before{
+  content:"";
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--red);
+  box-shadow:0 0 12px rgba(227,59,50,.72);
+}
+
+.broadcast-title{
+  margin-top:8px;
+  color:#fff7dc;
+  font-size:clamp(22px,4vw,34px);
+  line-height:1.1;
+  font-weight:900;
+}
+
+.broadcast-subtitle{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:900;
+}
+
+.broadcast-round-pill{
+  flex:0 0 auto;
+  min-width:130px;
+  padding:12px;
+  border-radius:8px;
+  color:#140a00;
+  background:linear-gradient(135deg,var(--gold),#fff0b6);
+  text-align:center;
+  font-weight:900;
+}
+
+.broadcast-round-pill span{
+  display:block;
+  font-size:11px;
+}
+
+.broadcast-round-pill strong{
+  display:block;
+  margin-top:4px;
+  font-size:20px;
+}
+
+.broadcast-matchup{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  gap:12px;
+  align-items:stretch;
+}
+
+.broadcast-player{
+  min-height:104px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:16px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.12);
+  border-left:5px solid var(--player-color,var(--gold));
+  background:
+    linear-gradient(135deg,color-mix(in srgb,var(--player-color,var(--gold)),transparent 82%),rgba(255,255,255,.045)),
+    rgba(0,0,0,.24);
+}
+
+.broadcast-player-dot{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  flex:0 0 auto;
+  background:var(--player-color,var(--gold));
+  box-shadow:0 0 18px color-mix(in srgb,var(--player-color,var(--gold)),transparent 25%);
+}
+
+.broadcast-player span{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:900;
+}
+
+.broadcast-player strong{
+  display:block;
+  margin-top:5px;
+  color:var(--player-color,#fff7dc);
+  font-size:clamp(22px,4.6vw,38px);
+  line-height:1.05;
+  overflow-wrap:anywhere;
+  text-shadow:0 0 18px color-mix(in srgb,var(--player-color,var(--gold)),transparent 45%);
+}
+
+.broadcast-vs{
+  width:64px;
+  display:grid;
+  place-items:center;
+  color:#140a00;
+  background:linear-gradient(135deg,var(--gold),#fff0b6);
+  border-radius:8px;
+  font-size:19px;
+  font-weight:900;
+  box-shadow:0 0 24px rgba(244,196,78,.18);
+}
+
+.broadcast-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(130px,1fr));
+  gap:10px;
+  margin-top:14px;
+}
+
+.broadcast-item{
+  min-height:74px;
+  padding:12px;
+  border-radius:8px;
+  background:rgba(0,0,0,.2);
+  border:1px solid rgba(255,255,255,.09);
+}
+
+.broadcast-item span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+}
+
+.broadcast-item strong{
+  display:block;
+  margin-top:7px;
+  color:#fff7dc;
+  font-size:18px;
+}
+
+.broadcast-champion-strip{
+  margin-top:12px;
+  min-height:54px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border-radius:8px;
+  border:1px solid rgba(244,196,78,.38);
+  background:linear-gradient(90deg,rgba(244,196,78,.18),rgba(227,59,50,.12));
+}
+
+.broadcast-champion-strip span{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+}
+
+.broadcast-champion-strip strong{
+  color:#fff7dc;
+  font-size:22px;
+  font-weight:900;
+}
+
 .confetti-layer{
   position:fixed;
   inset:0;
@@ -863,10 +1526,19 @@ input:focus{
   .round-tools{justify-content:flex-start;margin-top:12px}
   .steps{justify-content:flex-start;margin-top:16px}
   .layout{grid-template-columns:1fr}
+  .rule-hero,.rule-section-grid,.admin-grid{grid-template-columns:1fr}
+  .admin-field.full{grid-column:auto}
   .bracket-info{grid-template-columns:1fr}
   .side-panel{order:-1}
   .bracket-layout .side-panel{order:0}
   .field-grid{grid-template-columns:1fr}
+  .broadcast-grid{grid-template-columns:1fr 1fr}
+  .broadcast-top{display:block}
+  .broadcast-round-pill{margin-top:12px}
+  .broadcast-matchup{grid-template-columns:1fr}
+  .broadcast-vs{width:100%;min-height:42px}
+  .scroll-hint{display:block}
+  .btn,.back{min-height:48px}
 }
 
 @media(max-width:560px){
@@ -883,7 +1555,13 @@ input:focus{
   }
   .round-col{min-width:230px}
   .actions{display:grid}
+  .add-row,.edit-row{grid-template-columns:1fr}
   .start-panel #count{font-size:34px}
+  .broadcast-grid{grid-template-columns:1fr}
+  .broadcast-player{min-height:82px}
+  .broadcast-champion-strip{display:block}
+  .broadcast-champion-strip strong{display:block;margin-top:5px}
+  .slot{min-height:66px}
 }
 </style>
 </head>
@@ -902,6 +1580,7 @@ input:focus{
       <span class="step active" data-step="setup">1 参加人数</span>
       <span class="step" data-step="register">2 参加者</span>
       <span class="step" data-step="bracketPage">3 試合</span>
+      <span class="step" data-step="rulesPage">ルール</span>
     </nav>
   </header>
 
@@ -918,8 +1597,119 @@ input:focus{
         </div>
         <button id="startBtn" class="btn red">大会開始</button>
       </div>
+      <div class="start-actions">
+        <button id="openRulesBtn" class="btn secondary" type="button">ルール・大会情報</button>
+      </div>
       <div id="countWarn" class="warning">⚠ 2人以上にしてください</div>
     </div>
+  </section>
+
+  <section id="rulesPage" class="phase">
+    <div class="header">
+      <button id="backFromRulesBtn" class="back" type="button">← スタートへ</button>
+      <h2>ルール・大会情報</h2>
+      <button id="adminModeBtn" class="back" type="button">管理モード ON</button>
+    </div>
+
+    <div class="rule-hero">
+      <main class="panel main-panel">
+        <span class="eyebrow">TOURNAMENT INFO</span>
+        <h2 id="ruleTournamentName" class="rule-title">第1回ゼミスマブラ大会</h2>
+        <p id="ruleGameName" class="lead">大乱闘スマッシュブラザーズ SPECIAL</p>
+        <div class="stats">
+          <div class="stat"><span>大会形式</span><strong id="ruleFormatView">シングルエリミネーション</strong></div>
+          <div class="stat"><span>管理モード</span><strong id="ruleAdminStatus">OFF</strong></div>
+        </div>
+      </main>
+
+      <aside class="panel side-panel">
+        <h3>開催情報</h3>
+        <div class="rule-meta">
+          <div class="rule-meta-item"><span>開催日時</span><strong id="ruleDateView">未設定</strong></div>
+          <div class="rule-meta-item"><span>会場</span><strong id="ruleVenueView">未設定</strong></div>
+          <div class="rule-meta-item"><span>使用機材</span><strong id="ruleEquipmentView">未設定</strong></div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="rule-section-grid">
+      <section class="rule-card">
+        <h3>試合ルール</h3>
+        <ul id="rulesListView" class="rule-list"></ul>
+      </section>
+      <section class="rule-card">
+        <h3>禁止事項</h3>
+        <ul id="bansListView" class="rule-list"></ul>
+      </section>
+      <section class="rule-card">
+        <h3>注意事項</h3>
+        <ul id="notesListView" class="rule-list"></ul>
+      </section>
+    </div>
+
+    <section id="rulesAdminPanel" class="panel admin-panel" aria-label="ルール管理フォーム">
+      <h3>管理フォーム</h3>
+      <p class="note">変更内容は自動保存されます。大会ごとにゲーム名・大会名・ルールを編集できます。</p>
+
+      <div class="admin-grid">
+        <div class="admin-field">
+          <label class="label" for="ruleGameInput">ゲーム名</label>
+          <input id="ruleGameInput" type="text" autocomplete="off">
+        </div>
+        <div class="admin-field">
+          <label class="label" for="ruleTournamentInput">大会名</label>
+          <input id="ruleTournamentInput" type="text" autocomplete="off">
+        </div>
+        <div class="admin-field">
+          <label class="label" for="ruleDateInput">開催日時</label>
+          <input id="ruleDateInput" type="text" autocomplete="off" placeholder="例: 2026年6月1日 13:00">
+        </div>
+        <div class="admin-field">
+          <label class="label" for="ruleVenueInput">会場</label>
+          <input id="ruleVenueInput" type="text" autocomplete="off">
+        </div>
+        <div class="admin-field full">
+          <label class="label" for="ruleEquipmentInput">使用機材</label>
+          <textarea id="ruleEquipmentInput" autocomplete="off"></textarea>
+        </div>
+        <div class="admin-field full">
+          <label class="label" for="ruleFormatInput">大会形式</label>
+          <select id="ruleFormatInput">
+            <option value="シングルエリミネーション">シングルエリミネーション</option>
+            <option value="ダブルエリミネーション">ダブルエリミネーション</option>
+            <option value="総当たり">総当たり</option>
+            <option value="スイスドロー">スイスドロー</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="rule-section-grid" style="margin-top:18px">
+        <section class="rule-card">
+          <h3>試合ルール編集</h3>
+          <div id="rulesEditList" class="edit-list"></div>
+          <div class="add-row">
+            <input id="rulesNewInput" type="text" placeholder="ルールを追加">
+            <button id="rulesAddBtn" class="btn secondary" type="button">追加</button>
+          </div>
+        </section>
+        <section class="rule-card">
+          <h3>禁止事項編集</h3>
+          <div id="bansEditList" class="edit-list"></div>
+          <div class="add-row">
+            <input id="bansNewInput" type="text" placeholder="禁止事項を追加">
+            <button id="bansAddBtn" class="btn secondary" type="button">追加</button>
+          </div>
+        </section>
+        <section class="rule-card">
+          <h3>注意事項編集</h3>
+          <div id="notesEditList" class="edit-list"></div>
+          <div class="add-row">
+            <input id="notesNewInput" type="text" placeholder="注意事項を追加">
+            <button id="notesAddBtn" class="btn secondary" type="button">追加</button>
+          </div>
+        </section>
+      </div>
+    </section>
   </section>
 
   <section id="register" class="phase">
@@ -970,10 +1760,59 @@ input:focus{
               <h2 id="roundTitle">トーナメント表</h2>
               <span id="roundBadge" class="badge">0枠</span>
             </div>
-            <p id="roundNote" class="note">勝者をクリックしてください。勝った選手は右の枠へ進み、進んだ線が濃く表示されます。</p>
+            <p id="roundNote" class="note">勝たせたい選手の「勝利」を押してください。勝った選手は右の枠へ進みます。</p>
           </div>
           <div class="round-tools">
             <button id="zoomBracketBtn" class="btn secondary zoom-btn" type="button">全体表示</button>
+            <div class="zoom-view-toggle" aria-label="全体表示の形式">
+              <button id="zoomOverviewViewBtn" class="btn secondary" type="button">一望表示</button>
+              <button id="zoomListViewBtn" class="btn secondary" type="button">縦表示</button>
+              <button id="zoomBracketViewBtn" class="btn secondary" type="button">表形式</button>
+            </div>
+            <button id="broadcastBtn" class="btn secondary" type="button">配信用表示</button>
+            <button id="clearSaveBtn" class="btn secondary" type="button">保存データを削除して最初から</button>
+            <div id="saveStatusTop" class="save-status toolbar-save-status" data-save-status>保存状態: 未保存</div>
+          </div>
+        </div>
+        <div class="scroll-hint">横にスクロールできます。全体を見る場合は「全体表示」を押してください。</div>
+
+        <div id="broadcastPanel" class="broadcast-panel" aria-label="配信用表示">
+          <div class="broadcast-top">
+            <div>
+              <span class="broadcast-live">LIVE OVERLAY</span>
+              <h3 id="obsTournamentName" class="broadcast-title">スマブラ大会</h3>
+              <div id="obsGameName" class="broadcast-subtitle">大乱闘スマッシュブラザーズ SPECIAL</div>
+            </div>
+            <div class="broadcast-round-pill">
+              <span>ROUND</span>
+              <strong id="obsRound">-</strong>
+            </div>
+          </div>
+          <div class="broadcast-matchup">
+            <div id="obsPlayerABox" class="broadcast-player">
+              <span class="broadcast-player-dot"></span>
+              <div>
+                <span>PLAYER 1</span>
+                <strong id="obsPlayerA">未定</strong>
+              </div>
+            </div>
+            <div class="broadcast-vs">VS</div>
+            <div id="obsPlayerBBox" class="broadcast-player">
+              <span class="broadcast-player-dot"></span>
+              <div>
+                <span>PLAYER 2</span>
+                <strong id="obsPlayerB">未定</strong>
+              </div>
+            </div>
+          </div>
+          <div class="broadcast-grid">
+            <div class="broadcast-item"><span>直近の試合</span><strong id="obsMatch">-</strong></div>
+            <div class="broadcast-item"><span>勝者</span><strong id="obsWinner">-</strong></div>
+            <div class="broadcast-item"><span>進行状態</span><strong id="obsStatus">-</strong></div>
+          </div>
+          <div class="broadcast-champion-strip">
+            <span>CHAMPION</span>
+            <strong id="obsChampion">-</strong>
           </div>
         </div>
 
@@ -997,6 +1836,7 @@ input:focus{
         <div>
           <h3 class="legend-title">参加者カラー</h3>
           <div id="colorLegend" class="legend"></div>
+          <div id="saveStatus" class="save-status" data-save-status>保存状態: 未保存</div>
         </div>
       </aside>
     </div>
@@ -1010,6 +1850,27 @@ let names=[];
 let bracketRounds=[];
 let bracketSize=2;
 let lastCelebratedWinner='';
+let lastMatchInfo=null;
+let broadcastVisible=false;
+let rulesAdminMode=false;
+let zoomViewMode='list';
+
+const STORAGE_KEY='sumaburaTournamentState.v1';
+const RULES_STORAGE_KEY='sumaburaTournamentRules.v1';
+
+const defaultRuleInfo={
+  gameName:'大乱闘スマッシュブラザーズ SPECIAL',
+  tournamentName:'第1回ゼミスマブラ大会',
+  eventDate:'未設定',
+  venue:'未設定',
+  equipment:'Nintendo Switch / コントローラー / モニター',
+  format:'シングルエリミネーション',
+  rules:['3ストック','制限時間7分','アイテムなし','ステージ選択ルールは当日発表'],
+  bans:['煽り行為','遅延行為','無断離席'],
+  notes:['開始時間までに集合してください','呼び出し後に不在の場合は運営判断になります']
+};
+
+let ruleInfo=copyRuleInfo(defaultRuleInfo);
 
 const playerPalette=[
   '#ff4b3e','#f4c44e','#42d77d','#47a7ff',
@@ -1055,6 +1916,217 @@ function getPlayerColor(player){
   return playerPalette[hash];
 }
 
+function getStorage(){
+  try{
+    return window.localStorage || null;
+  }catch(error){
+    return null;
+  }
+}
+
+function copyRuleInfo(source){
+  return {
+    gameName:source.gameName || defaultRuleInfo.gameName,
+    tournamentName:source.tournamentName || defaultRuleInfo.tournamentName,
+    eventDate:source.eventDate || '未設定',
+    venue:source.venue || '未設定',
+    equipment:source.equipment || '未設定',
+    format:source.format || defaultRuleInfo.format,
+    rules:Array.isArray(source.rules) ? source.rules : [...defaultRuleInfo.rules],
+    bans:Array.isArray(source.bans) ? source.bans : [...defaultRuleInfo.bans],
+    notes:Array.isArray(source.notes) ? source.notes : [...defaultRuleInfo.notes]
+  };
+}
+
+function setText(id,value){
+  const element=document.getElementById(id);
+  if(element){
+    element.textContent=value || '未設定';
+  }
+}
+
+function saveRuleInfo(){
+  const storage=getStorage();
+
+  if(!storage){
+    return;
+  }
+
+  try{
+    storage.setItem(RULES_STORAGE_KEY,JSON.stringify({
+      gameName:ruleInfo.gameName,
+      tournamentName:ruleInfo.tournamentName,
+      eventDate:ruleInfo.eventDate,
+      venue:ruleInfo.venue,
+      equipment:ruleInfo.equipment,
+      format:ruleInfo.format,
+      rules:ruleInfo.rules,
+      bans:ruleInfo.bans,
+      notes:ruleInfo.notes,
+      updatedAt:new Date().toISOString()
+    }));
+  }catch(error){
+    // Saving can fail in private browser modes. The page still works without blocking.
+  }
+}
+
+function loadRuleInfo(){
+  const storage=getStorage();
+
+  if(!storage){
+    ruleInfo=copyRuleInfo(defaultRuleInfo);
+    return;
+  }
+
+  try{
+    const raw=storage.getItem(RULES_STORAGE_KEY);
+    ruleInfo=raw ? copyRuleInfo(JSON.parse(raw)) : copyRuleInfo(defaultRuleInfo);
+  }catch(error){
+    storage.removeItem(RULES_STORAGE_KEY);
+    ruleInfo=copyRuleInfo(defaultRuleInfo);
+  }
+}
+
+function renderRulesPage(){
+  setText('ruleTournamentName',ruleInfo.tournamentName);
+  setText('ruleGameName',ruleInfo.gameName);
+  setText('ruleFormatView',ruleInfo.format);
+  setText('ruleDateView',ruleInfo.eventDate);
+  setText('ruleVenueView',ruleInfo.venue);
+  setText('ruleEquipmentView',ruleInfo.equipment);
+  setText('ruleAdminStatus',rulesAdminMode ? 'ON' : 'OFF');
+
+  const adminButton=document.getElementById('adminModeBtn');
+  const adminPanel=document.getElementById('rulesAdminPanel');
+
+  if(adminButton){
+    adminButton.textContent=rulesAdminMode ? '管理モード OFF' : '管理モード ON';
+  }
+
+  if(adminPanel){
+    adminPanel.classList.toggle('active',rulesAdminMode);
+  }
+
+  renderRuleList('rulesListView',ruleInfo.rules);
+  renderRuleList('bansListView',ruleInfo.bans);
+  renderRuleList('notesListView',ruleInfo.notes);
+  renderRuleEditor();
+}
+
+function renderRuleList(id,items){
+  const list=document.getElementById(id);
+
+  if(!list){
+    return;
+  }
+
+  list.textContent='';
+
+  if(!items.length){
+    const item=document.createElement('li');
+    item.className='rule-empty';
+    item.textContent='未設定';
+    list.appendChild(item);
+    return;
+  }
+
+  items.forEach(function(text){
+    const item=document.createElement('li');
+    item.textContent=text;
+    list.appendChild(item);
+  });
+}
+
+function renderRuleEditor(){
+  setInputValue('ruleGameInput',ruleInfo.gameName);
+  setInputValue('ruleTournamentInput',ruleInfo.tournamentName);
+  setInputValue('ruleDateInput',ruleInfo.eventDate);
+  setInputValue('ruleVenueInput',ruleInfo.venue);
+  setInputValue('ruleEquipmentInput',ruleInfo.equipment);
+  setInputValue('ruleFormatInput',ruleInfo.format);
+  renderEditableRuleList('rulesEditList','rules',ruleInfo.rules);
+  renderEditableRuleList('bansEditList','bans',ruleInfo.bans);
+  renderEditableRuleList('notesEditList','notes',ruleInfo.notes);
+}
+
+function setInputValue(id,value){
+  const input=document.getElementById(id);
+  if(input && input.value!==value){
+    input.value=value || '';
+  }
+}
+
+function renderEditableRuleList(containerId,key,items){
+  const container=document.getElementById(containerId);
+
+  if(!container){
+    return;
+  }
+
+  container.textContent='';
+
+  if(!items.length){
+    const empty=document.createElement('div');
+    empty.className='rule-empty';
+    empty.textContent='まだ登録されていません';
+    container.appendChild(empty);
+    return;
+  }
+
+  items.forEach(function(text,index){
+    const row=document.createElement('div');
+    const input=document.createElement('input');
+    const button=document.createElement('button');
+
+    row.className='edit-row';
+    input.type='text';
+    input.value=text;
+    input.addEventListener('change',function(){
+      ruleInfo[key][index]=input.value.trim();
+      saveRuleInfo();
+      renderRulesPage();
+    });
+
+    button.type='button';
+    button.className='delete-rule';
+    button.textContent='削除';
+    button.addEventListener('click',function(){
+      ruleInfo[key].splice(index,1);
+      saveRuleInfo();
+      renderRulesPage();
+    });
+
+    row.appendChild(input);
+    row.appendChild(button);
+    container.appendChild(row);
+  });
+}
+
+function updateRuleField(key,value){
+  ruleInfo[key]=value.trim() || '未設定';
+  saveRuleInfo();
+  renderRulesPage();
+}
+
+function addRuleItem(key,inputId){
+  const input=document.getElementById(inputId);
+  const value=input ? input.value.trim() : '';
+
+  if(!value){
+    return;
+  }
+
+  ruleInfo[key].push(value);
+  input.value='';
+  saveRuleInfo();
+  renderRulesPage();
+}
+
+function toggleRulesAdminMode(){
+  rulesAdminMode=!rulesAdminMode;
+  renderRulesPage();
+}
+
 function show(id){
   if(id!=='bracketPage'){
     setBracketZoom(false);
@@ -1077,6 +2149,94 @@ function roundNameByIndex(roundIndex){
   if(remaining===2){return '決勝';}
   if(remaining===4){return '準決勝';}
   return (roundIndex+1)+'回戦';
+}
+
+function getActivePhaseId(){
+  const active=document.querySelector('.phase.active');
+  return active ? active.id : 'setup';
+}
+
+function getCurrentRoundName(){
+  if(bracketRounds.length===0){
+    return '-';
+  }
+
+  for(let i=0;i<bracketRounds.length;i+=1){
+    if(bracketRounds[i].some(function(match){return !match.winner;})){
+      return roundNameByIndex(i);
+    }
+  }
+
+  return getChampionWinner() ? '大会終了' : roundNameByIndex(bracketRounds.length-1);
+}
+
+function getBroadcastMatchInfo(){
+  if(lastMatchInfo){
+    return {
+      roundName:lastMatchInfo.roundName,
+      matchName:lastMatchInfo.matchName,
+      players:lastMatchInfo.players || [],
+      winner:lastMatchInfo.winner || '-',
+      status:lastMatchInfo.winner ? '勝者決定' : '進行中'
+    };
+  }
+
+  for(let roundIndex=0;roundIndex<bracketRounds.length;roundIndex+=1){
+    const round=bracketRounds[roundIndex];
+    for(let matchIndex=0;matchIndex<round.length;matchIndex+=1){
+      const match=round[matchIndex];
+      const hasBoth=Boolean(match.players[0] && match.players[1]);
+      if(hasBoth && !match.winner){
+        return {
+          roundName:roundNameByIndex(roundIndex),
+          matchName:'MATCH '+(match.matchIndex+1),
+          players:[...match.players],
+          winner:'-',
+          status:'次の試合'
+        };
+      }
+    }
+  }
+
+  return {
+    roundName:getCurrentRoundName(),
+    matchName:'未選択',
+    players:[],
+    winner:getChampionWinner() || '-',
+    status:getChampionWinner() ? '大会終了' : '待機中'
+  };
+}
+
+function setBroadcastPlayer(boxId,nameId,label,player){
+  const box=document.getElementById(boxId);
+  const name=document.getElementById(nameId);
+  const playerName=player || label;
+
+  if(!box || !name){
+    return;
+  }
+
+  box.style.setProperty('--player-color',player ? getPlayerColor(player) : '#8d8577');
+  name.textContent=playerName;
+}
+
+// Future extension note:
+// Double elimination can be added by replacing bracketRounds with an object like
+// { winners: [...], losers: [...], grandFinal: [...] } and routing placeWinner()
+// into Winners / Losers / Grand Final brackets instead of a single array.
+
+// Future Firebase note:
+// To sync tournaments remotely, save names, bracketRounds, bracketSize,
+// champion:getChampionWinner(), lastMatchInfo, broadcastVisible, and updatedAt.
+// Future rules extension note:
+// For multiple tournament profiles, store ruleInfo under a tournamentId and keep
+// gameName, tournamentName, eventDate, venue, equipment, format, rules, bans,
+// notes, Discord channel ids, Firebase document ids, PDF export settings,
+// and OBS rule overlay visibility in the same profile object.
+
+function openRulesPage(){
+  renderRulesPage();
+  show('rulesPage');
 }
 
 // ===== Setup screen =====
@@ -1105,6 +2265,7 @@ function goRegister(){
   renderNames();
   updateRegisterStats();
   show('register');
+  saveState();
 }
 
 // ===== Register screen =====
@@ -1128,6 +2289,7 @@ function renderNames(){
     input.addEventListener('input',function(){
       names[index]=input.value.trim() || '参加者'+(index+1);
       updateRegisterStats();
+      saveState();
     });
 
     box.appendChild(label);
@@ -1145,6 +2307,7 @@ function updateRegisterStats(){
 function shuffleNames(){
   names=shuffle(names);
   renderNames();
+  saveState();
 }
 
 // ===== Tournament creation =====
@@ -1155,10 +2318,12 @@ function makeBracket(){
 
   bracketSize=nextPowerOfTwo(names.length);
   lastCelebratedWinner='';
+  lastMatchInfo=null;
   buildBracket();
 
   show('bracketPage');
   renderBracket();
+  saveState();
 }
 
 function buildBracket(){
@@ -1219,7 +2384,7 @@ function renderBracket(){
   document.getElementById('roundBadge').textContent=names.length+'名 / '+bracketSize+'枠';
   document.getElementById('statRound').textContent=bracketRounds.length;
   document.getElementById('statRemain').textContent=Math.max(0,names.length-1);
-  document.getElementById('roundNote').textContent='勝者をクリックしてください。勝った選手は右の枠へ進み、進んだ線が濃く表示されます。';
+  document.getElementById('roundNote').textContent='勝たせたい選手の「勝利」を押してください。勝った選手は右の枠へ進みます。';
 
   bracketRounds.forEach(function(round,roundIndex){
     const column=document.createElement('section');
@@ -1250,6 +2415,8 @@ function renderBracket(){
   renderHistory();
   renderColorLegend();
   updateChampion();
+  updateBroadcastPanel();
+  updateSaveStatus();
   refreshBracketLayout();
 }
 
@@ -1312,6 +2479,7 @@ function createMatchCard(match,roundIndex){
   card.className='match';
   card.dataset.round=roundIndex;
   card.dataset.match=match.matchIndex;
+  card.style.animationDelay=Math.min(220,(roundIndex*70)+(match.matchIndex*24))+'ms';
   head.className='match-head';
   matchName.textContent='MATCH '+(match.matchIndex+1);
   roundLabel.textContent=roundNameByIndex(roundIndex);
@@ -1354,13 +2522,19 @@ function createSlot(match,slotIndex){
 
     if(match.winner===player){
       slot.classList.add('win');
-      status.textContent=match.bye ? '不戦勝' : '勝者';
+      if(lastMatchInfo &&
+        lastMatchInfo.roundIndex===match.roundIndex &&
+        lastMatchInfo.matchIndex===match.matchIndex &&
+        lastMatchInfo.winner===player){
+        slot.classList.add('flash');
+      }
+      status.textContent=match.bye ? '不戦勝' : '勝利';
     }else if(match.winner){
       slot.classList.add('lose');
       status.textContent='敗退';
     }else if(hasBoth){
       slot.classList.add('ready');
-      status.textContent='選択';
+      status.textContent='勝利';
     }else{
       slot.classList.add('advanced');
       status.textContent='進出待ち';
@@ -1390,8 +2564,17 @@ function selectWinner(roundIndex,matchIndex,slotIndex){
   clearWinnerPath(roundIndex,matchIndex);
   match.winner=winner;
   match.bye=false;
+  lastMatchInfo={
+    roundIndex:roundIndex,
+    matchIndex:matchIndex,
+    roundName:roundNameByIndex(roundIndex),
+    matchName:'MATCH '+(matchIndex+1),
+    players:[...match.players],
+    winner:winner
+  };
   placeWinner(roundIndex,matchIndex,winner);
   renderBracket();
+  saveState();
 }
 
 function clearWinnerPath(roundIndex,matchIndex){
@@ -1522,6 +2705,163 @@ function renderColorLegend(){
   });
 }
 
+function updateBroadcastPanel(){
+  const panel=document.getElementById('broadcastPanel');
+  const button=document.getElementById('broadcastBtn');
+  const tournamentName=document.getElementById('obsTournamentName');
+  const gameName=document.getElementById('obsGameName');
+  const round=document.getElementById('obsRound');
+  const match=document.getElementById('obsMatch');
+  const winner=document.getElementById('obsWinner');
+  const champion=document.getElementById('obsChampion');
+  const status=document.getElementById('obsStatus');
+
+  if(!panel || !round || !match || !winner || !champion || !status){
+    return;
+  }
+
+  const info=getBroadcastMatchInfo();
+
+  panel.classList.toggle('active',broadcastVisible);
+  if(tournamentName){
+    tournamentName.textContent=ruleInfo.tournamentName || 'スマブラ大会';
+  }
+  if(gameName){
+    gameName.textContent=ruleInfo.gameName || '大乱闘スマッシュブラザーズ SPECIAL';
+  }
+  round.textContent=info.roundName;
+  match.textContent=info.roundName+' '+info.matchName;
+  winner.textContent=info.winner;
+  status.textContent=info.status;
+  champion.textContent=getChampionWinner() || '-';
+  setBroadcastPlayer('obsPlayerABox','obsPlayerA','未定',info.players[0]);
+  setBroadcastPlayer('obsPlayerBBox','obsPlayerB','未定',info.players[1]);
+
+  if(button){
+    button.textContent=broadcastVisible ? '配信用表示 ON' : '配信用表示';
+  }
+}
+
+function toggleBroadcastPanel(){
+  broadcastVisible=!broadcastVisible;
+  updateBroadcastPanel();
+  if(broadcastVisible){
+    const panel=document.getElementById('broadcastPanel');
+    if(panel){
+      panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+  }
+  saveState();
+}
+
+function updateSaveStatus(){
+  const message=getStorage() ? '保存状態: 自動保存中' : '保存状態: この環境では保存不可';
+  document.querySelectorAll('[data-save-status]').forEach(function(status){
+    status.textContent=message;
+  });
+}
+
+function saveState(){
+  const storage=getStorage();
+  const state={
+    countValue:parseInt(document.getElementById('count').value,10) || names.length || 8,
+    names:names,
+    bracketRounds:bracketRounds,
+    bracketSize:bracketSize,
+    lastMatchInfo:lastMatchInfo,
+    broadcastVisible:broadcastVisible,
+    zoomViewMode:zoomViewMode,
+    phase:getActivePhaseId(),
+    updatedAt:new Date().toISOString()
+  };
+
+  if(!storage){
+    document.querySelectorAll('[data-save-status]').forEach(function(status){
+      status.textContent='保存状態: この環境では保存不可';
+    });
+    return;
+  }
+
+  try{
+    storage.setItem(STORAGE_KEY,JSON.stringify(state));
+    document.querySelectorAll('[data-save-status]').forEach(function(status){
+      status.textContent='保存状態: 保存完了 '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+    });
+  }catch(error){
+    document.querySelectorAll('[data-save-status]').forEach(function(status){
+      status.textContent='保存状態: 保存できません';
+    });
+  }
+}
+
+function loadSavedState(){
+  const storage=getStorage();
+
+  if(!storage){
+    updateSaveStatus();
+    return;
+  }
+
+  const raw=storage.getItem(STORAGE_KEY);
+
+  if(!raw){
+    updateSaveStatus();
+    return;
+  }
+
+  try{
+    const state=JSON.parse(raw);
+    names=Array.isArray(state.names) ? state.names : [];
+    bracketRounds=Array.isArray(state.bracketRounds) ? state.bracketRounds : [];
+    bracketSize=Number.isFinite(state.bracketSize) ? state.bracketSize : nextPowerOfTwo(Math.max(2,names.length));
+    lastMatchInfo=state.lastMatchInfo || null;
+    broadcastVisible=Boolean(state.broadcastVisible);
+    zoomViewMode=state.zoomViewMode==='bracket' || state.zoomViewMode==='overview' ? state.zoomViewMode : 'list';
+    lastCelebratedWinner=getChampionWinner() || '';
+    document.getElementById('count').value=state.countValue || names.length || 8;
+
+    if(names.length>0){
+      renderNames();
+      updateRegisterStats();
+    }
+
+    if(bracketRounds.length>0){
+      show('bracketPage');
+      renderBracket();
+    }else if(names.length>0 && state.phase==='register'){
+      show('register');
+    }
+
+    updateBroadcastPanel();
+    updateSaveStatus();
+  }catch(error){
+    storage.removeItem(STORAGE_KEY);
+    updateSaveStatus();
+  }
+}
+
+function clearSavedData(){
+  const storage=getStorage();
+  if(storage){
+    storage.removeItem(STORAGE_KEY);
+  }
+  names=[];
+  bracketRounds=[];
+  bracketSize=2;
+  lastMatchInfo=null;
+  lastCelebratedWinner='';
+  broadcastVisible=false;
+  document.getElementById('count').value=8;
+  document.getElementById('champion').style.display='none';
+  document.getElementById('confettiLayer').textContent='';
+  setBracketZoom(false);
+  updateBroadcastPanel();
+  show('setup');
+  document.querySelectorAll('[data-save-status]').forEach(function(status){
+    status.textContent='保存状態: 削除済み';
+  });
+}
+
 function arrangeBracketMatches(){
   const canvas=document.getElementById('bracketCanvas');
   const lists=Array.from(document.querySelectorAll('.round-col .round-matches'));
@@ -1609,7 +2949,12 @@ function refreshBracketLayout(){
 function setBracketZoom(enabled){
   const button=document.getElementById('zoomBracketBtn');
 
+  if(enabled && bracketSize>=16){
+    zoomViewMode='overview';
+  }
+
   document.body.classList.toggle('zoom-mode',enabled);
+  updateZoomViewMode();
 
   if(button){
     button.textContent=enabled ? '通常表示へ' : '全体表示';
@@ -1620,6 +2965,38 @@ function setBracketZoom(enabled){
 
 function toggleBracketZoom(){
   setBracketZoom(!document.body.classList.contains('zoom-mode'));
+}
+
+function setZoomViewMode(mode){
+  if(mode==='bracket' || mode==='overview'){
+    zoomViewMode=mode;
+  }else{
+    zoomViewMode='list';
+  }
+  updateZoomViewMode();
+  refreshBracketLayout();
+}
+
+function updateZoomViewMode(){
+  const overviewButton=document.getElementById('zoomOverviewViewBtn');
+  const listButton=document.getElementById('zoomListViewBtn');
+  const bracketButton=document.getElementById('zoomBracketViewBtn');
+
+  document.body.classList.toggle('zoom-overview-view',zoomViewMode==='overview');
+  document.body.classList.toggle('zoom-list-view',zoomViewMode==='list');
+  document.body.classList.toggle('zoom-bracket-view',zoomViewMode==='bracket');
+
+  if(overviewButton){
+    overviewButton.setAttribute('aria-pressed',String(zoomViewMode==='overview'));
+  }
+
+  if(listButton){
+    listButton.setAttribute('aria-pressed',String(zoomViewMode==='list'));
+  }
+
+  if(bracketButton){
+    bracketButton.setAttribute('aria-pressed',String(zoomViewMode==='bracket'));
+  }
 }
 
 function resetBracketScale(){
@@ -1655,17 +3032,39 @@ function fitZoomBracketToViewport(){
   const scrollHeight=Math.max(220,panelRect.height-roundBarHeight-58);
   scroll.style.height=scrollHeight+'px';
 
-  const bracketRect=bracket.getBoundingClientRect();
-  const canvasRect=canvas.getBoundingClientRect();
-  const availableWidth=Math.max(1,scroll.clientWidth-12);
-  const availableHeight=Math.max(1,scroll.clientHeight-12);
-  const contentWidth=Math.max(1,bracketRect.right-canvasRect.left);
-  const contentHeight=Math.max(1,bracketRect.bottom-canvasRect.top);
-  const scale=Math.max(.18,Math.min(availableWidth/contentWidth,availableHeight/contentHeight,1));
+  if(zoomViewMode==='overview'){
+    const bracketRect=bracket.getBoundingClientRect();
+    const availableWidth=Math.max(1,scroll.clientWidth-8);
+    const availableHeight=Math.max(1,scroll.clientHeight-8);
+    const contentWidth=Math.max(1,bracket.scrollWidth,bracketRect.width);
+    const contentHeight=Math.max(1,bracket.scrollHeight,bracketRect.height);
+    const scale=Math.max(.18,Math.min(availableWidth/contentWidth,availableHeight/contentHeight,1));
 
-  canvas.style.width=contentWidth+'px';
-  canvas.style.height=contentHeight+'px';
-  canvas.style.transform='scale('+scale+')';
+    canvas.style.width=contentWidth+'px';
+    canvas.style.height=contentHeight+'px';
+    canvas.style.transform='scale('+scale+')';
+    scroll.scrollLeft=0;
+    scroll.scrollTop=0;
+    return;
+  }
+
+  if(zoomViewMode==='bracket'){
+    const bracketRect=bracket.getBoundingClientRect();
+    const canvasRect=canvas.getBoundingClientRect();
+    const contentWidth=Math.max(1,bracketRect.right-canvasRect.left);
+    const contentHeight=Math.max(1,bracketRect.bottom-canvasRect.top);
+
+    canvas.style.width=contentWidth+'px';
+    canvas.style.height=contentHeight+'px';
+    canvas.style.transform='';
+    scroll.scrollLeft=0;
+    scroll.scrollTop=0;
+    return;
+  }
+
+  canvas.style.width='';
+  canvas.style.height='';
+  canvas.style.transform='';
   scroll.scrollLeft=0;
   scroll.scrollTop=0;
 }
@@ -1822,6 +3221,7 @@ function drawChampionLines(svg,canvasRect){
 
     const item={player:player,element:source};
     sourceItems.push(item);
+
     if(finalMatch.winner===player){
       winnerSource=item;
     }
@@ -1856,19 +3256,20 @@ function getConnectorPoints(sourceItems,target,canvasRect){
   const x2=targetRect.left-canvasRect.left;
   const y2=targetRect.top+targetRect.height/2-canvasRect.top;
   const x1=Math.max.apply(null,sourcePoints.map(function(point){return point.x;}));
-  const gap=Math.max(24,x2-x1);
-  const bend=Math.min(72,Math.max(24,gap*.34),Math.max(16,gap/2-4));
+  const rawGap=Math.max(1,x2-x1);
+  const bend=Math.max(5,Math.min(72,rawGap*.34,Math.max(5,rawGap/2-3)));
   const branchX=x1+bend;
   const targetX=x2-bend;
   const centerY=sourcePoints.reduce(function(sum,point){
     return sum+point.y;
   },0)/sourcePoints.length;
+  const alignedY2=Math.abs(y2-centerY)<6 ? centerY : y2;
 
   return {
     sourcePoints:sourcePoints,
     x1:x1,
     x2:x2,
-    y2:y2,
+    y2:alignedY2,
     branchX:branchX,
     targetX:targetX,
     centerY:centerY
@@ -1917,20 +3318,65 @@ function createWinnerConnectorPath(points,winnerElement){
 }
 
 function resetTournament(){
-  bracketRounds=[];
-  lastCelebratedWinner='';
-  setBracketZoom(false);
-  document.getElementById('champion').style.display='none';
-  document.getElementById('confettiLayer').textContent='';
-  show('setup');
+  clearSavedData();
 }
 
 // ===== Event bindings: all actions are bound from JavaScript =====
 document.getElementById('startBtn').addEventListener('click',goRegister);
+document.getElementById('openRulesBtn').addEventListener('click',openRulesPage);
+document.getElementById('count').addEventListener('input',function(){
+  saveState();
+});
 document.getElementById('count').addEventListener('keydown',function(event){
   if(event.key==='Enter'){
     goRegister();
   }
+});
+document.getElementById('backFromRulesBtn').addEventListener('click',function(){
+  show('setup');
+});
+document.getElementById('adminModeBtn').addEventListener('click',toggleRulesAdminMode);
+document.getElementById('ruleGameInput').addEventListener('change',function(event){
+  updateRuleField('gameName',event.target.value);
+});
+document.getElementById('ruleTournamentInput').addEventListener('change',function(event){
+  updateRuleField('tournamentName',event.target.value);
+});
+document.getElementById('ruleDateInput').addEventListener('change',function(event){
+  updateRuleField('eventDate',event.target.value);
+});
+document.getElementById('ruleVenueInput').addEventListener('change',function(event){
+  updateRuleField('venue',event.target.value);
+});
+document.getElementById('ruleEquipmentInput').addEventListener('change',function(event){
+  updateRuleField('equipment',event.target.value);
+});
+document.getElementById('ruleFormatInput').addEventListener('change',function(event){
+  updateRuleField('format',event.target.value);
+});
+document.getElementById('rulesAddBtn').addEventListener('click',function(){
+  addRuleItem('rules','rulesNewInput');
+});
+document.getElementById('bansAddBtn').addEventListener('click',function(){
+  addRuleItem('bans','bansNewInput');
+});
+document.getElementById('notesAddBtn').addEventListener('click',function(){
+  addRuleItem('notes','notesNewInput');
+});
+['rulesNewInput','bansNewInput','notesNewInput'].forEach(function(id){
+  document.getElementById(id).addEventListener('keydown',function(event){
+    if(event.key!=='Enter'){
+      return;
+    }
+
+    if(id==='rulesNewInput'){
+      addRuleItem('rules',id);
+    }else if(id==='bansNewInput'){
+      addRuleItem('bans',id);
+    }else{
+      addRuleItem('notes',id);
+    }
+  });
 });
 document.getElementById('backSetupBtn').addEventListener('click',function(){
   show('setup');
@@ -1942,6 +3388,17 @@ document.getElementById('backRegisterBtn').addEventListener('click',function(){
 });
 document.getElementById('resetBtn').addEventListener('click',resetTournament);
 document.getElementById('zoomBracketBtn').addEventListener('click',toggleBracketZoom);
+document.getElementById('zoomOverviewViewBtn').addEventListener('click',function(){
+  setZoomViewMode('overview');
+});
+document.getElementById('zoomListViewBtn').addEventListener('click',function(){
+  setZoomViewMode('list');
+});
+document.getElementById('zoomBracketViewBtn').addEventListener('click',function(){
+  setZoomViewMode('bracket');
+});
+document.getElementById('broadcastBtn').addEventListener('click',toggleBroadcastPanel);
+document.getElementById('clearSaveBtn').addEventListener('click',clearSavedData);
 document.addEventListener('keydown',function(event){
   if(event.key==='Escape' && document.body.classList.contains('zoom-mode')){
     setBracketZoom(false);
@@ -1950,6 +3407,9 @@ document.addEventListener('keydown',function(event){
 window.addEventListener('resize',function(){
   refreshBracketLayout();
 });
+loadRuleInfo();
+renderRulesPage();
+loadSavedState();
 </script>
 </body>
 </html>
