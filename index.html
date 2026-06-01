@@ -2335,7 +2335,7 @@ body.viewer-mode .ready{
       <div class="auth-logo-icon">S</div>
       <div>
         <div class="auth-title">管理者ページ</div>
-        <div class="auth-sub">スマブラ大会 — 運営専用 v8</div>
+        <div class="auth-sub">スマブラ大会 — 運営専用 v9</div>
       </div>
     </div>
     <label class="auth-label" for="authPasswordInput">パスワード（16桁）</label>
@@ -2974,8 +2974,6 @@ function setPageRole(role,updateUrl){
     }
   }
 
-  renderRulesPage();
-  updateBroadcastPanel();
 }
 
 function saveRuleInfo(){
@@ -3186,7 +3184,6 @@ function updateModeUI(){
   }
 
   updateRegisterStats();
-  updateBroadcastPanel();
 }
 
 function renderRuleList(id,items){
@@ -5862,47 +5859,46 @@ document.addEventListener('keydown',function(event){
 window.addEventListener('resize',function(){
   refreshBracketLayout();
 });
-try{
-  initializeRoleFromUrl();
-}catch(e){console.error('initializeRoleFromUrl failed:',e);}
-try{
-  loadRuleInfo();
-}catch(e){console.error('loadRuleInfo failed:',e);}
-try{
-  if(!isViewerMode()){saveRuleInfo();}
-}catch(e){console.error('saveRuleInfo failed:',e);}
-try{
-  renderRulesPage();
-}catch(e){console.error('renderRulesPage failed:',e);}
-try{
-  updateModeUI();
-}catch(e){console.error('updateModeUI failed:',e);}
-try{
-  renderTimer();
-}catch(e){console.error('renderTimer failed:',e);}
-try{
-  loadSavedState();
-}catch(e){console.error('loadSavedState failed:',e);}
+initializeRoleFromUrl();
+loadRuleInfo();
+if(!isViewerMode()){
+  saveRuleInfo();
+}
+renderRulesPage();
+updateModeUI();
+updateBroadcastPanel();
+renderTimer();
+loadSavedState();
 </script>
 
 <script>
 (function(){
   var ADMIN_PW='515f534a47cb0cde';
-  var SESSION_KEY='sumabraAdminSession.v1';
+  // メモリ内フラグ（sessionStorage不要）
+  var _authed=false;
 
   function isAuthed(){
-    try{return sessionStorage.getItem(SESSION_KEY)==='1';}catch(e){return false;}
+    if(_authed){return true;}
+    try{return sessionStorage.getItem('sumabraAdminSession.v1')==='1';}catch(e){return false;}
   }
   function setAuthed(){
-    try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}
+    _authed=true;
+    try{sessionStorage.setItem('sumabraAdminSession.v1','1');}catch(e){}
   }
   function isViewer(){
-    var p=new URLSearchParams(window.location.search);
-    var m=p.get('mode')||p.get('role')||p.get('view');
-    return m==='viewer';
+    try{
+      var p=new URLSearchParams(window.location.search);
+      var m=p.get('mode')||p.get('role')||p.get('view');
+      return m==='viewer';
+    }catch(e){return false;}
   }
 
   var overlay=document.getElementById('adminAuthOverlay');
+  var errorEl=document.getElementById('authError');
+  var input=document.getElementById('authPasswordInput');
+  var submitBtn=document.getElementById('authSubmitBtn');
+  var viewerBtn=document.getElementById('authViewerBtn');
+  var toggleBtn=document.getElementById('authToggleBtn');
 
   // 認証不要ならオーバーレイを閉じて終了
   if(isViewer()||isAuthed()){
@@ -5913,11 +5909,9 @@ try{
   // オーバーレイを表示
   if(overlay){overlay.style.display='flex';}
 
-  var errorEl=document.getElementById('authError');
-  var input=document.getElementById('authPasswordInput');
-  var submitBtn=document.getElementById('authSubmitBtn');
-  var viewerBtn=document.getElementById('authViewerBtn');
-  var toggleBtn=document.getElementById('authToggleBtn');
+  function showError(msg){
+    if(errorEl){errorEl.textContent=msg;errorEl.style.display='block';}
+  }
 
   function tryLogin(){
     var pw=input?input.value:'';
@@ -5925,30 +5919,29 @@ try{
       setAuthed();
       if(overlay){overlay.style.display='none';}
     }else{
-      if(errorEl){
-        errorEl.textContent=pw.length!==16?'16桁のパスワードを入力してください':'パスワードが正しくありません';
-        errorEl.style.display='block';
-      }
+      showError(pw.length!==16?'16桁のパスワードを入力してください':'パスワードが正しくありません');
       if(input){input.value='';input.focus();}
     }
   }
 
-  if(submitBtn){submitBtn.addEventListener('click',tryLogin);}
+  if(submitBtn){
+    submitBtn.onclick=function(){tryLogin();return false;};
+  }
   if(input){
-    input.addEventListener('keydown',function(e){
-      if(e.key==='Enter'){tryLogin();}
-    });
+    input.onkeydown=function(e){if((e||window.event).key==='Enter'){tryLogin();}};
   }
   if(toggleBtn){
-    toggleBtn.addEventListener('click',function(){
+    toggleBtn.onclick=function(){
       if(input){input.type=input.type==='password'?'text':'password';}
-    });
+      return false;
+    };
   }
   if(viewerBtn){
-    viewerBtn.addEventListener('click',function(){
+    viewerBtn.onclick=function(){
       if(overlay){overlay.style.display='none';}
       if(typeof setPageRole==='function'){setPageRole('viewer',true);}
-    });
+      return false;
+    };
   }
 })();
 </script>
