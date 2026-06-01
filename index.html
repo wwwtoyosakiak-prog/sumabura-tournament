@@ -5711,6 +5711,9 @@ function createChampionColumn(){
 function renderDoubleBracket(){
   const bracket=document.getElementById('bracket');
   const svg=document.getElementById('bracketLines');
+  const scroll=document.querySelector('.bracket-scroll');
+  const previousScrollLeft=scroll ? scroll.scrollLeft : 0;
+  const previousScrollTop=scroll ? scroll.scrollTop : 0;
 
   if(!doubleBracket){
     buildDoubleBracket();
@@ -5755,9 +5758,12 @@ function renderDoubleBracket(){
   updateBroadcastPanel();
   updateSaveStatus();
 
-  // スクロール位置を左端にリセット
-  var scroll=document.querySelector('.bracket-scroll');
-  if(scroll){scroll.scrollLeft=0;}
+  if(scroll){
+    requestAnimationFrame(function(){
+      scroll.scrollLeft=Math.min(previousScrollLeft,Math.max(0,scroll.scrollWidth-scroll.clientWidth));
+      scroll.scrollTop=previousScrollTop;
+    });
+  }
 }
 
 function roundNameByIndexForDouble(roundIndex,totalRounds){
@@ -5776,11 +5782,7 @@ function createDoubleRoundColumn(titleText,round,stage){
   column.dataset.doubleStage=stage;
   title.textContent=titleText;
   list.className='round-matches';
-  if(stage!=='winner' || round[0].roundIndex>0){
-    list.classList.add('arranged');
-  }else{
-    list.style.gap='16px';
-  }
+  list.style.gap='16px';
 
   round.forEach(function(match){
     list.appendChild(createDoubleMatchCard(match));
@@ -5798,7 +5800,8 @@ function createDoubleQueueColumn(){
 
   column.className='round-col';
   title.textContent='敗者側 待機';
-  list.className='round-matches arranged';
+  list.className='round-matches';
+  list.style.gap='16px';
 
   doubleBracket.loserQueue.forEach(function(player,index){
     const card=createDoubleMatchCard(createDoubleMatch('queue',0,index,player,null));
