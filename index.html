@@ -48,6 +48,150 @@ body::before{
 button,input{font:inherit}
 button{border:none}
 
+/* ===== Admin password overlay ===== */
+#adminAuthOverlay{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:
+    radial-gradient(circle at 18% 8%,rgba(227,59,50,.32),transparent 30%),
+    radial-gradient(circle at 86% 12%,rgba(244,196,78,.16),transparent 28%),
+    linear-gradient(145deg,#140707 0%,#060607 52%,#15100a 100%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+#adminAuthOverlay.hidden{
+  display:none!important;
+}
+
+.auth-box{
+  width:min(440px,100%);
+  padding:36px 30px;
+  border-radius:12px;
+  background:linear-gradient(180deg,rgba(25,25,32,.97),rgba(12,12,16,.97));
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 32px 80px rgba(0,0,0,.6);
+  animation:fadeUp .3s ease both;
+}
+
+.auth-logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:24px;
+}
+
+.auth-logo-icon{
+  width:44px;
+  height:44px;
+  border-radius:8px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,var(--red),var(--gold));
+  font-weight:900;
+  color:#140a00;
+  font-size:18px;
+}
+
+.auth-title{
+  font-size:22px;
+  font-weight:900;
+  color:var(--text);
+}
+
+.auth-sub{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:2px;
+}
+
+.auth-label{
+  display:block;
+  color:#fff1c9;
+  font-size:14px;
+  font-weight:900;
+  margin-bottom:8px;
+}
+
+.auth-input-wrap{
+  position:relative;
+  margin-bottom:14px;
+}
+
+.auth-input-wrap input{
+  width:100%;
+  min-height:54px;
+  padding:12px 48px 12px 14px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.2);
+  background:#09090d;
+  color:var(--text);
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:0.18em;
+}
+
+.auth-input-wrap input:focus{
+  outline:2px solid rgba(244,196,78,.55);
+  border-color:var(--gold);
+}
+
+.auth-toggle{
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  background:none;
+  border:none;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:18px;
+  padding:4px;
+  line-height:1;
+}
+
+.auth-error{
+  display:none;
+  color:#ff8b82;
+  font-size:13px;
+  font-weight:900;
+  margin-bottom:12px;
+  padding:10px 12px;
+  border-radius:8px;
+  background:rgba(227,59,50,.12);
+  border:1px solid rgba(227,59,50,.35);
+}
+
+.auth-hint{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+  margin-bottom:18px;
+  line-height:1.6;
+}
+
+.auth-actions{
+  display:grid;
+  gap:10px;
+}
+
+.auth-set-section{
+  margin-top:18px;
+  padding-top:18px;
+  border-top:1px solid rgba(255,255,255,.1);
+}
+
+.auth-set-section p{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+  margin-bottom:12px;
+  line-height:1.6;
+}
+
 .page{
   width:min(1120px,100%);
   margin:0 auto;
@@ -364,44 +508,6 @@ input:focus,textarea:focus,select:focus{
   font-weight:700;
 }
 
-.firebase-panel{
-  display:grid;
-  gap:12px;
-  margin-bottom:18px;
-  padding:14px;
-}
-
-.firebase-panel h2{
-  color:var(--gold-2);
-  font-size:18px;
-}
-
-.firebase-grid{
-  display:grid;
-  grid-template-columns:minmax(160px,.35fr) minmax(260px,1fr) auto auto;
-  gap:10px;
-  align-items:end;
-}
-
-.firebase-grid textarea{
-  min-height:84px;
-  font-size:12px;
-  font-weight:700;
-}
-
-.firebase-status{
-  color:var(--muted);
-  font-size:12px;
-  font-weight:900;
-}
-
-.firebase-status.connected{
-  color:var(--green);
-}
-
-.firebase-status.error{
-  color:#ff8b82;
-}
 
 body.viewer-mode .admin-only,
 body.viewer-mode .placement-actions{
@@ -1725,6 +1831,152 @@ body.viewer-mode .ready{
   to{opacity:1;transform:translateY(0)}
 }
 
+/* ===== Detailed rule sections ===== */
+.rule-detail-section{
+  margin-top:20px;
+}
+
+.rule-detail-tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:16px;
+  flex-wrap:wrap;
+}
+
+.rule-tab{
+  min-height:40px;
+  padding:9px 16px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.18);
+  color:var(--muted);
+  background:rgba(255,255,255,.06);
+  cursor:pointer;
+  font-size:13px;
+  font-weight:900;
+  transition:background .15s,color .15s;
+}
+
+.rule-tab.active{
+  color:#140a00;
+  background:linear-gradient(135deg,var(--gold),#fff0b6);
+  border-color:transparent;
+}
+
+.rule-detail-body{
+  display:none;
+}
+
+.rule-detail-body.active{
+  display:block;
+  animation:fadeUp .25s ease both;
+}
+
+.rule-flow{
+  display:grid;
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.rule-flow-item{
+  display:grid;
+  grid-template-columns:36px 1fr;
+  gap:12px;
+  align-items:start;
+  padding:12px 14px;
+  border-radius:8px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.rule-flow-num{
+  display:grid;
+  place-items:center;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  color:#140a00;
+  background:linear-gradient(135deg,var(--gold),#fff0b6);
+  font-size:14px;
+  font-weight:900;
+  flex-shrink:0;
+}
+
+.rule-flow-text{
+  padding-top:8px;
+  color:#fff7dc;
+  font-size:14px;
+  font-weight:900;
+  line-height:1.6;
+}
+
+.rule-flow-text span{
+  display:block;
+  color:var(--gold-2);
+  font-size:12px;
+  margin-bottom:3px;
+  font-weight:900;
+}
+
+.rule-highlight-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.rule-highlight{
+  padding:14px;
+  border-radius:8px;
+  border:1px solid rgba(244,196,78,.28);
+  background:rgba(244,196,78,.07);
+  text-align:center;
+}
+
+.rule-highlight .val{
+  display:block;
+  font-size:22px;
+  font-weight:900;
+  color:var(--gold-2);
+  line-height:1.2;
+  margin-bottom:5px;
+}
+
+.rule-highlight .lbl{
+  display:block;
+  font-size:12px;
+  color:var(--muted);
+  font-weight:900;
+}
+
+.rule-warn-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:10px;
+}
+
+.rule-warn-item{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  padding:12px;
+  border-radius:8px;
+  background:rgba(227,59,50,.09);
+  border:1px solid rgba(227,59,50,.3);
+}
+
+.rule-warn-icon{
+  font-size:16px;
+  flex-shrink:0;
+  margin-top:1px;
+}
+
+.rule-warn-text{
+  color:#ffd3d0;
+  font-size:13px;
+  font-weight:900;
+  line-height:1.5;
+}
+
 @keyframes popIn{
   from{opacity:0;transform:scale(.98)}
   to{opacity:1;transform:scale(1)}
@@ -2075,6 +2327,51 @@ body.viewer-mode .ready{
 </head>
 
 <body>
+
+<!-- ===== 管理者パスワード認証オーバーレイ ===== -->
+<div id="adminAuthOverlay" class="hidden">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">S</div>
+      <div>
+        <div class="auth-title">管理者ページ</div>
+        <div class="auth-sub">スマブラ大会 — 運営専用</div>
+      </div>
+    </div>
+
+    <div id="authLoginSection">
+      <label class="auth-label" for="authPasswordInput">パスワード（16桁）</label>
+      <div class="auth-input-wrap">
+        <input id="authPasswordInput" type="password" maxlength="16" autocomplete="off" placeholder="••••••••••••••••">
+        <button id="authToggleBtn" class="auth-toggle" type="button" title="表示切り替え">👁</button>
+      </div>
+      <div id="authError" class="auth-error">パスワードが正しくありません</div>
+      <div class="auth-actions">
+        <button id="authSubmitBtn" class="btn" type="button">ログイン</button>
+        <button id="authViewerBtn" class="btn secondary" type="button">閲覧者として続ける</button>
+      </div>
+    </div>
+
+    <div id="authSetSection" style="display:none">
+      <div class="auth-hint">初回アクセスです。管理者パスワードを設定してください。<br>16桁の英数字を入力してください。</div>
+      <label class="auth-label" for="authSetInput">新しいパスワード（16桁）</label>
+      <div class="auth-input-wrap">
+        <input id="authSetInput" type="password" maxlength="16" autocomplete="new-password" placeholder="••••••••••••••••">
+        <button id="authSetToggleBtn" class="auth-toggle" type="button" title="表示切り替え">👁</button>
+      </div>
+      <label class="auth-label" for="authConfirmInput">確認（もう一度入力）</label>
+      <div class="auth-input-wrap">
+        <input id="authConfirmInput" type="password" maxlength="16" autocomplete="new-password" placeholder="••••••••••••••••">
+      </div>
+      <div id="authSetError" class="auth-error">パスワードが一致しません</div>
+      <div class="auth-actions">
+        <button id="authSetSubmitBtn" class="btn" type="button">パスワードを設定する</button>
+        <button id="authViewerBtn2" class="btn secondary" type="button">閲覧者として続ける</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="page">
   <header class="topbar">
     <div class="brand">
@@ -2099,26 +2396,17 @@ body.viewer-mode .ready{
     </div>
     <div class="role-info">
       <strong id="roleStatus">管理者ページ</strong>
-      <input id="viewerUrl" type="text" readonly aria-label="閲覧者ページURL">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center">
+        <input id="adminUrl" type="text" readonly aria-label="管理者ページURL" placeholder="管理者URL">
+        <button id="copyAdminUrlBtn" class="btn secondary" type="button" style="min-height:38px;padding:8px 12px;font-size:12px">コピー</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center">
+        <input id="viewerUrl" type="text" readonly aria-label="閲覧者ページURL" placeholder="閲覧者URL">
+        <button id="copyViewerUrlBtn" class="btn secondary" type="button" style="min-height:38px;padding:8px 12px;font-size:12px">コピー</button>
+      </div>
     </div>
   </section>
 
-  <section class="panel firebase-panel" aria-label="Firebase同期設定">
-    <h2>Firebase同期</h2>
-    <div class="firebase-grid">
-      <div>
-        <label class="label" for="firebaseTournamentId">大会ID</label>
-        <input id="firebaseTournamentId" type="text" value="sumabura-main" autocomplete="off">
-      </div>
-      <div class="admin-only viewer-allowed">
-        <label class="label" for="firebaseConfigInput">Firebase設定JSON</label>
-        <textarea id="firebaseConfigInput" autocomplete="off" placeholder='{"apiKey":"...","authDomain":"...","databaseURL":"...","projectId":"...","appId":"..."}'></textarea>
-      </div>
-      <button id="firebaseConnectBtn" class="btn red" type="button">同期開始</button>
-      <button id="firebasePushBtn" class="btn secondary admin-only" type="button">今すぐ反映</button>
-    </div>
-    <div id="firebaseStatus" class="firebase-status">未接続: Firebase設定JSONと大会IDを入力してください</div>
-  </section>
 
   <section id="timerPanel" class="panel timer-panel" aria-label="大会タイマー">
     <div class="timer-title">
@@ -2208,6 +2496,88 @@ body.viewer-mode .ready{
         <ul id="notesListView" class="rule-list"></ul>
       </section>
     </div>
+
+    <!-- ===== 詳細ルールセクション ===== -->
+    <div class="rule-detail-section">
+      <div class="rule-detail-tabs">
+        <button class="rule-tab active" onclick="switchRuleTab('league')" type="button">4人ポイント戦ルール</button>
+        <button class="rule-tab" onclick="switchRuleTab('tournament')" type="button">1on1トーナメントルール</button>
+        <button class="rule-tab" onclick="switchRuleTab('common')" type="button">共通注意事項</button>
+      </div>
+
+      <!-- 4人ポイント戦 -->
+      <div id="ruleDetailLeague" class="rule-detail-body panel main-panel active">
+        <div class="rule-highlight-grid">
+          <div class="rule-highlight"><span class="val">4人</span><span class="lbl">対戦人数</span></div>
+          <div class="rule-highlight"><span class="val">70分</span><span class="lbl">大会時間</span></div>
+          <div class="rule-highlight"><span class="val">ポイント制</span><span class="lbl">勝敗方式</span></div>
+          <div class="rule-highlight"><span class="val">30秒</span><span class="lbl">ファイター選択制限</span></div>
+        </div>
+        <div class="rule-flow">
+          <div class="rule-flow-item">
+            <div class="rule-flow-num">1</div>
+            <div class="rule-flow-text"><span>試合開始</span>4人でスマブラの試合を行います。大会時間の70分間、大会ルールで試合を続けてください。</div>
+          </div>
+          <div class="rule-flow-item">
+            <div class="rule-flow-num">2</div>
+            <div class="rule-flow-text"><span>ファイター選択</span>使用ファイターの選択は<strong style="color:var(--gold-2)">30秒以内</strong>に行ってください。大会を円滑に進めるためご協力をお願いします。</div>
+          </div>
+          <div class="rule-flow-item">
+            <div class="rule-flow-num">3</div>
+            <div class="rule-flow-text"><span>試合終了後の移動</span>試合終了後、<strong style="color:var(--gold-2)">1位と4位の人は隣のモニターの場所へ移動</strong>してください。移動・コントローラー/キーコン設定完了後、次の試合を開始してください。</div>
+          </div>
+          <div class="rule-flow-item">
+            <div class="rule-flow-num">4</div>
+            <div class="rule-flow-text"><span>ポイント集計</span>1位:10pt / 2位:8pt / 3位:5pt / 4位:3pt を加算。70分終了時の<strong style="color:var(--gold-2)">総獲得ポイントが最も多い人が優勝</strong>です。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1on1トーナメント -->
+      <div id="ruleDetailTournament" class="rule-detail-body panel main-panel">
+        <div class="rule-highlight-grid">
+          <div class="rule-highlight"><span class="val">1on1</span><span class="lbl">対戦形式</span></div>
+          <div class="rule-highlight"><span class="val">2本先取</span><span class="lbl">勝利条件（決勝も同様）</span></div>
+          <div class="rule-highlight"><span class="val">3ストック 7分</span><span class="lbl">試合設定</span></div>
+          <div class="rule-highlight"><span class="val">なし</span><span class="lbl">アイテム / ステージギミック</span></div>
+        </div>
+        <div class="rule-flow">
+          <div class="rule-flow-item">
+            <div class="rule-flow-num">1</div>
+            <div class="rule-flow-text"><span>トーナメント表の確認</span>配布URLからトーナメント表を開き、自分の対戦相手・位置を確認してください。</div>
+          </div>
+          <div class="rule-flow-item">
+            <div class="rule-flow-num">2</div>
+            <div class="rule-flow-text"><span>ステージ選択ジャンケン（第1試合）</span>試合開始前にジャンケンを行い、<strong style="color:var(--gold-2)">勝った人がステージを選択</strong>します。選択可能ステージは参加者に配布のカードで確認してください。</div>
+          </div>
+          <div class="rule-flow-item">
+            <div class="rule-flow-num">3</div>
+            <div class="rule-flow-text"><span>ファイター選択</span>使用ファイターの選択は<strong style="color:var(--gold-2)">30秒以内</strong>に行ってください。</div>
+          </div>
+          <div class="rule-flow-item">
+            <div class="rule-flow-num">4</div>
+            <div class="rule-flow-text"><span>第2試合のステージ選択</span>第2試合は<strong style="color:var(--gold-2)">第1試合に負けた人</strong>がステージ選択権を得ます。</div>
+          </div>
+          <div class="rule-flow-item">
+            <div class="rule-flow-num">5</div>
+            <div class="rule-flow-text"><span>試合開始</span>対戦カードが決まり次第、速やかに試合を開始してください。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 共通注意事項 -->
+      <div id="ruleDetailCommon" class="rule-detail-body panel main-panel">
+        <div class="rule-warn-grid">
+          <div class="rule-warn-item"><span class="rule-warn-icon">🚫</span><span class="rule-warn-text">煽り行為は禁止です</span></div>
+          <div class="rule-warn-item"><span class="rule-warn-icon">⏱</span><span class="rule-warn-text">キャラクター選択画面等での明らかな遅延行為は禁止です</span></div>
+          <div class="rule-warn-item"><span class="rule-warn-icon">🚶</span><span class="rule-warn-text">無断離席は禁止です</span></div>
+          <div class="rule-warn-item"><span class="rule-warn-icon">📢</span><span class="rule-warn-text">呼び出し後に不在の場合は参加取消となります</span></div>
+          <div class="rule-warn-item"><span class="rule-warn-icon">🚫</span><span class="rule-warn-text">虚偽の報告は禁止です</span></div>
+          <div class="rule-warn-item"><span class="rule-warn-icon">📱</span><span class="rule-warn-text">急用ができ参加不可になった場合は、必ず運営に連絡してください</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- /詳細ルールセクション -->
 
     <section id="rulesAdminPanel" class="panel admin-panel" aria-label="ルール管理フォーム">
       <h3>管理フォーム</h3>
@@ -2435,15 +2805,8 @@ let timerEndAt=null;
 let timerRunning=false;
 let timerIntervalId=null;
 let timerAlarmPlayed=false;
-let firebaseTournamentId='sumabura-main';
-let firebaseConfigText='';
-let firebaseApplyingRemote=false;
-let firebaseConnected=false;
-let lastFirebaseWriteStamp='';
-
 const STORAGE_KEY='sumaburaTournamentState.v1';
 const RULES_STORAGE_KEY='sumaburaTournamentRules.v1';
-const FIREBASE_SETTINGS_KEY='sumaburaFirebaseSettings.v1';
 
 const tournamentDefaultRuleInfo={
   gameName:'大乱闘スマッシュブラザーズ SPECIAL',
@@ -2451,22 +2814,47 @@ const tournamentDefaultRuleInfo={
   eventDate:'未設定',
   venue:'未設定',
   equipment:'Nintendo Switch / コントローラー / モニター',
-  format:'シングルエリミネーション',
-  rules:['3ストック','制限時間7分','アイテムなし','ステージ選択ルールは当日発表'],
-  bans:['煽り行為','遅延行為','無断離席'],
-  notes:['勝者は運営に結果を報告してください','呼び出し後に不在の場合は運営判断になります']
+  format:'シングルエリミネーション（2本先取）',
+  rules:[
+    'ストック制 3ストック・7分・ステージギミックなし・アイテムなし',
+    '選択可能ステージは参加者に配布のカードで確認',
+    '対戦カードが決まり次第、試合を開始してください',
+    'ファイター選択は30秒以内に行ってください',
+    '試合開始前にステージ選択ジャンケンを行い、勝者がステージを選択',
+    '2試合目は1試合目に負けた人がステージ選択権を得ます',
+    'トーナメント表のURLから自分の位置を確認してください',
+    '大会形式は2本先取制（決勝戦も同様）'
+  ],
+  bans:['煽り行為禁止','キャラ選択・試合中の明らかな遅延行為禁止','無断離席禁止','虚偽の報告禁止'],
+  notes:[
+    '呼び出し後、不在の場合は参加取消となります',
+    '急用で参加不可になった場合は必ず運営に連絡してください',
+    '勝者は運営に結果を報告してください'
+  ]
 };
 
 const leagueDefaultRuleInfo={
   gameName:'大乱闘スマッシュブラザーズ SPECIAL',
-  tournamentName:'エンジョイ大乱闘',
+  tournamentName:'第1回ゼミスマブラ大会',
   eventDate:'未設定',
   venue:'未設定',
   equipment:'Nintendo Switch / コントローラー / モニター',
-  format:'4人マッチポイント制',
-  rules:['エンジョイ大乱闘','複数の組み合わせで分かれる','タイム制 6分','乱闘','ステージギミックあり','アイテムあり（すべて）','大会順位はポイント制','1位10p / 2位8p / 3位5p / 4位3p（4人ver.）'],
-  bans:['煽り行為','遅延行為','無断離席'],
-  notes:['開始時間までに集合してください','呼び出し後に不在の場合は運営判断になります']
+  format:'4人ポイント戦（70分制）',
+  rules:[
+    '4人で対戦・大会順位はポイント制',
+    '1位:10p / 2位:8p / 3位:5p / 4位:3p',
+    '試合終了後、1位と4位の人は隣のモニターへ移動',
+    '移動・コントローラー/キーコン設定完了後に試合開始',
+    'ファイター選択は30秒以内に行ってください',
+    '70分間、大会ルールで試合を継続します',
+    '時間終了時の総獲得ポイントが多い人が優勝'
+  ],
+  bans:['煽り行為禁止','キャラ選択・試合中の明らかな遅延行為禁止','無断離席禁止','虚偽の報告禁止'],
+  notes:[
+    '呼び出し後、不在の場合は参加取消となります',
+    '急用で参加不可になった場合は必ず運営に連絡してください',
+    '開始時間までに必ず集合してください'
+  ]
 };
 
 const defaultRuleInfo=tournamentDefaultRuleInfo;
@@ -2550,15 +2938,171 @@ function setText(id,value){
   }
 }
 
+// ===== Admin password auth =====
+const AUTH_KEY='sumabraAdminAuth.v1';
+const AUTH_SESSION_KEY='sumabraAdminSession.v1';
+
+async function sha256hex(text){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+}
+
+function getStoredPasswordHash(){
+  try{return localStorage.getItem(AUTH_KEY) || null}catch(e){return null}
+}
+
+function storePasswordHash(hash){
+  try{localStorage.setItem(AUTH_KEY,hash)}catch(e){}
+}
+
+function isSessionAuthed(){
+  try{return sessionStorage.getItem(AUTH_SESSION_KEY)==='1'}catch(e){return false}
+}
+
+function setSessionAuthed(){
+  try{sessionStorage.setItem(AUTH_SESSION_KEY,'1')}catch(e){}
+}
+
+function showAuthError(id,msg){
+  const el=document.getElementById(id);
+  if(el){el.textContent=msg;el.style.display='block'}
+}
+
+function hideAuthError(id){
+  const el=document.getElementById(id);
+  if(el){el.style.display='none'}
+}
+
+function dismissAuthOverlay(){
+  const overlay=document.getElementById('adminAuthOverlay');
+  if(overlay){overlay.classList.add('hidden')}
+}
+
+async function initAdminAuth(){
+  const params=new URLSearchParams(window.location.search);
+  const mode=params.get('mode') || params.get('role') || params.get('view');
+
+  // 閲覧者URLは認証不要
+  if(mode==='viewer'){
+    dismissAuthOverlay();
+    return;
+  }
+
+  // セッション中に認証済みなら即通過
+  if(isSessionAuthed()){
+    dismissAuthOverlay();
+    return;
+  }
+
+  const storedHash=getStoredPasswordHash();
+  const overlay=document.getElementById('adminAuthOverlay');
+  const loginSection=document.getElementById('authLoginSection');
+  const setSection=document.getElementById('authSetSection');
+
+  if(overlay){overlay.classList.remove('hidden')}
+
+  if(!storedHash){
+    // 未設定: パスワード設定画面
+    if(loginSection){loginSection.style.display='none'}
+    if(setSection){setSection.style.display='block'}
+  } else {
+    // 設定済み: ログイン画面
+    if(loginSection){loginSection.style.display='block'}
+    if(setSection){setSection.style.display='none'}
+  }
+
+  // ログイン
+  document.getElementById('authSubmitBtn').addEventListener('click',async function(){
+    const pw=document.getElementById('authPasswordInput').value;
+    if(pw.length!==16){
+      showAuthError('authError','16桁のパスワードを入力してください');
+      return;
+    }
+    const hash=await sha256hex(pw);
+    if(hash===getStoredPasswordHash()){
+      setSessionAuthed();
+      dismissAuthOverlay();
+      hideAuthError('authError');
+    } else {
+      showAuthError('authError','パスワードが正しくありません');
+      document.getElementById('authPasswordInput').value='';
+      document.getElementById('authPasswordInput').focus();
+    }
+  });
+
+  document.getElementById('authPasswordInput').addEventListener('keydown',function(e){
+    if(e.key==='Enter'){document.getElementById('authSubmitBtn').click()}
+  });
+
+  // 表示トグル
+  document.getElementById('authToggleBtn').addEventListener('click',function(){
+    const inp=document.getElementById('authPasswordInput');
+    inp.type=inp.type==='password' ? 'text' : 'password';
+  });
+
+  // 閲覧者として続ける
+  document.getElementById('authViewerBtn').addEventListener('click',function(){
+    dismissAuthOverlay();
+    setPageRole('viewer',true);
+  });
+
+  // パスワード設定
+  document.getElementById('authSetSubmitBtn').addEventListener('click',async function(){
+    const pw=document.getElementById('authSetInput').value;
+    const confirm=document.getElementById('authConfirmInput').value;
+    if(pw.length!==16){
+      showAuthError('authSetError','16桁のパスワードを入力してください');
+      return;
+    }
+    if(pw!==confirm){
+      showAuthError('authSetError','パスワードが一致しません');
+      return;
+    }
+    const hash=await sha256hex(pw);
+    storePasswordHash(hash);
+    setSessionAuthed();
+    dismissAuthOverlay();
+    hideAuthError('authSetError');
+  });
+
+  document.getElementById('authSetInput').addEventListener('keydown',function(e){
+    if(e.key==='Enter'){document.getElementById('authConfirmInput').focus()}
+  });
+
+  document.getElementById('authConfirmInput').addEventListener('keydown',function(e){
+    if(e.key==='Enter'){document.getElementById('authSetSubmitBtn').click()}
+  });
+
+  document.getElementById('authSetToggleBtn').addEventListener('click',function(){
+    const inp=document.getElementById('authSetInput');
+    inp.type=inp.type==='password' ? 'text' : 'password';
+  });
+
+  document.getElementById('authViewerBtn2').addEventListener('click',function(){
+    dismissAuthOverlay();
+    setPageRole('viewer',true);
+  });
+}
+
 function initializeRoleFromUrl(){
   const params=new URLSearchParams(window.location.search);
-  const role=params.get('role') || params.get('view') || window.location.hash.replace('#','');
-  pageRole=role==='viewer' ? 'viewer' : 'admin';
+  const mode=params.get('mode') || params.get('role') || params.get('view');
+  pageRole=mode==='viewer' ? 'viewer' : 'admin';
   setPageRole(pageRole,false);
 }
 
 function isViewerMode(){
   return pageRole==='viewer';
+}
+
+const SITE_BASE_URL='https://wwwtoyosakiak-prog.github.io/sumabura-tournament/';
+
+function getAdminPageUrl(){
+  return SITE_BASE_URL+'?mode=admin';
+}
+
+function getViewerPageUrl(){
+  return SITE_BASE_URL+'?mode=viewer';
 }
 
 function setPageRole(role,updateUrl){
@@ -2569,6 +3113,7 @@ function setPageRole(role,updateUrl){
   const viewerButton=document.getElementById('viewerPageBtn');
   const status=document.getElementById('roleStatus');
   const viewerUrl=document.getElementById('viewerUrl');
+  const adminUrl=document.getElementById('adminUrl');
 
   if(adminButton){
     adminButton.classList.toggle('active',!isViewerMode());
@@ -2584,19 +3129,23 @@ function setPageRole(role,updateUrl){
       : '管理者ページ: 参加者登録・結果入力ができます';
   }
 
+  if(adminUrl){
+    adminUrl.value=getAdminPageUrl();
+  }
+
   if(viewerUrl){
     viewerUrl.value=getViewerPageUrl();
   }
 
   if(updateUrl){
-    const url=new URL(window.location.href);
-    if(isViewerMode()){
-      url.searchParams.set('role','viewer');
-    }else{
-      url.searchParams.delete('role');
-      url.searchParams.delete('view');
+    const targetUrl=isViewerMode() ? getViewerPageUrl() : getAdminPageUrl();
+    try{
+      window.history.replaceState(null,'',targetUrl);
+    }catch(e){
+      /* ローカル開発時などクロスオリジンでエラーになる場合は相対パスでフォールバック */
+      const rel=isViewerMode() ? '?mode=viewer' : '?mode=admin';
+      window.history.replaceState(null,'',rel);
     }
-    window.history.replaceState(null,'',url.toString());
   }
 
   if(isViewerMode() && getActivePhaseId()==='setup'){
@@ -2610,142 +3159,6 @@ function setPageRole(role,updateUrl){
 
   renderRulesPage();
   updateBroadcastPanel();
-}
-
-function getViewerPageUrl(){
-  const url=new URL(window.location.href);
-  url.searchParams.set('role','viewer');
-  return url.toString();
-}
-
-function loadFirebaseSettings(){
-  const storage=getStorage();
-  if(!storage){
-    return;
-  }
-
-  try{
-    const raw=storage.getItem(FIREBASE_SETTINGS_KEY);
-    if(!raw){
-      return;
-    }
-    const settings=JSON.parse(raw);
-    firebaseTournamentId=settings.tournamentId || firebaseTournamentId;
-    firebaseConfigText=settings.configText || '';
-    updateFirebaseInputs();
-  }catch(error){
-    storage.removeItem(FIREBASE_SETTINGS_KEY);
-  }
-}
-
-function saveFirebaseSettings(){
-  const storage=getStorage();
-  if(!storage){
-    return;
-  }
-
-  storage.setItem(FIREBASE_SETTINGS_KEY,JSON.stringify({
-    tournamentId:firebaseTournamentId,
-    configText:firebaseConfigText,
-    updatedAt:new Date().toISOString()
-  }));
-}
-
-function updateFirebaseInputs(){
-  const idInput=document.getElementById('firebaseTournamentId');
-  const configInput=document.getElementById('firebaseConfigInput');
-
-  if(idInput && idInput.value!==firebaseTournamentId){
-    idInput.value=firebaseTournamentId;
-  }
-
-  if(configInput && configInput.value!==firebaseConfigText){
-    configInput.value=firebaseConfigText;
-  }
-}
-
-function setFirebaseStatus(message,type){
-  const status=document.getElementById('firebaseStatus');
-  firebaseConnected=type==='connected' ? true : type==='error' ? false : firebaseConnected;
-  if(!status){
-    return;
-  }
-
-  status.textContent=message;
-  status.classList.toggle('connected',type==='connected');
-  status.classList.toggle('error',type==='error');
-}
-
-function parseFirebaseConfig(){
-  try{
-    const config=JSON.parse(firebaseConfigText);
-    if(!config.apiKey || !config.databaseURL || !config.projectId){
-      throw new Error('missing fields');
-    }
-    return config;
-  }catch(error){
-    setFirebaseStatus('Firebase設定JSONを確認してください。apiKey / databaseURL / projectId が必要です。','error');
-    return null;
-  }
-}
-
-function connectFirebaseSync(){
-  const config=parseFirebaseConfig();
-  const tournamentId=(firebaseTournamentId || '').trim();
-
-  if(!config || !tournamentId){
-    if(!tournamentId){
-      setFirebaseStatus('大会IDを入力してください。','error');
-    }
-    return;
-  }
-
-  if(!window.firebaseTournament){
-    setFirebaseStatus('Firebase SDKを読み込み中です。少し待ってからもう一度押してください。','error');
-    return;
-  }
-
-  saveFirebaseSettings();
-  setFirebaseStatus('Firebaseへ接続中です...','');
-  window.firebaseTournament.connect({
-    config:config,
-    tournamentId:tournamentId,
-    onRemoteState:applyFirebaseState,
-    onStatus:setFirebaseStatus
-  });
-}
-
-function pushFirebaseNow(){
-  if(isViewerMode()){
-    return;
-  }
-
-  const state=createPersistedState();
-  publishFirebaseState(state,true);
-}
-
-function publishFirebaseState(state,force){
-  if(firebaseApplyingRemote || isViewerMode()){
-    return;
-  }
-
-  if(!window.firebaseTournament || !firebaseConnected){
-    return;
-  }
-
-  lastFirebaseWriteStamp=state.updatedAt;
-  window.firebaseTournament.save(state,force);
-}
-
-function applyFirebaseState(state){
-  if(!state || state.updatedAt===lastFirebaseWriteStamp){
-    return;
-  }
-
-  firebaseApplyingRemote=true;
-  applyPersistedState(state);
-  firebaseApplyingRemote=false;
-  setFirebaseStatus('Firebase同期中: 最新状態を表示しています','connected');
 }
 
 function saveRuleInfo(){
@@ -2766,9 +3179,6 @@ function saveRuleInfo(){
       },
       updatedAt:new Date().toISOString()
     }));
-    if(firebaseConnected && !isViewerMode()){
-      publishFirebaseState(createPersistedState(),false);
-    }
   }catch(error){
     // Saving can fail in private browser modes. The page still works without blocking.
   }
@@ -2998,6 +3408,21 @@ function renderRuleEditor(){
   renderEditableRuleList('notesEditList','notes',ruleInfo.notes);
 }
 
+function switchRuleTab(tabKey){
+  const bodies=document.querySelectorAll('.rule-detail-body');
+  bodies.forEach(function(el){el.classList.remove('active')});
+  const target=document.getElementById(
+    tabKey==='league' ? 'ruleDetailLeague' :
+    tabKey==='tournament' ? 'ruleDetailTournament' :
+    'ruleDetailCommon'
+  );
+  if(target){target.classList.add('active')}
+  document.querySelectorAll('.rule-tab').forEach(function(btn,i){
+    const keys=['league','tournament','common'];
+    btn.classList.toggle('active',keys[i]===tabKey);
+  });
+}
+
 function setInputValue(id,value){
   const input=document.getElementById(id);
   if(input && input.value!==value){
@@ -3180,13 +3605,10 @@ function setBroadcastPlayer(boxId,nameId,label,player){
 // { winners: [...], losers: [...], grandFinal: [...] } and routing placeWinner()
 // into Winners / Losers / Grand Final brackets instead of a single array.
 
-// Future Firebase note:
-// To sync tournaments remotely, save names, bracketRounds, bracketSize,
-// champion:getChampionWinner(), lastMatchInfo, broadcastVisible, and updatedAt.
 // Future rules extension note:
 // For multiple tournament profiles, store ruleInfo under a tournamentId and keep
 // gameName, tournamentName, eventDate, venue, equipment, format, rules, bans,
-// notes, Discord channel ids, Firebase document ids, PDF export settings,
+// notes, Discord channel ids, PDF export settings,
 // and OBS rule overlay visibility in the same profile object.
 
 function openRulesPage(){
@@ -5423,7 +5845,6 @@ function saveState(){
 
   try{
     storage.setItem(STORAGE_KEY,JSON.stringify(state));
-    publishFirebaseState(state,false);
     document.querySelectorAll('[data-save-status]').forEach(function(status){
       status.textContent='保存状態: 保存完了 '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
     });
@@ -5508,17 +5929,34 @@ document.getElementById('adminPageBtn').addEventListener('click',function(){
 document.getElementById('viewerPageBtn').addEventListener('click',function(){
   setPageRole('viewer',true);
 });
-document.getElementById('firebaseTournamentId').addEventListener('input',function(event){
-  firebaseTournamentId=event.target.value.trim() || 'sumabura-main';
-  saveFirebaseSettings();
-  updateFirebaseInputs();
+document.getElementById('copyAdminUrlBtn').addEventListener('click',function(){
+  const input=document.getElementById('adminUrl');
+  if(input && input.value){
+    navigator.clipboard.writeText(input.value).then(function(){
+      const btn=document.getElementById('copyAdminUrlBtn');
+      const orig=btn.textContent;
+      btn.textContent='✓ コピー済み';
+      setTimeout(function(){btn.textContent=orig;},1800);
+    }).catch(function(){
+      input.select();
+      document.execCommand('copy');
+    });
+  }
 });
-document.getElementById('firebaseConfigInput').addEventListener('input',function(event){
-  firebaseConfigText=event.target.value.trim();
-  saveFirebaseSettings();
+document.getElementById('copyViewerUrlBtn').addEventListener('click',function(){
+  const input=document.getElementById('viewerUrl');
+  if(input && input.value){
+    navigator.clipboard.writeText(input.value).then(function(){
+      const btn=document.getElementById('copyViewerUrlBtn');
+      const orig=btn.textContent;
+      btn.textContent='✓ コピー済み';
+      setTimeout(function(){btn.textContent=orig;},1800);
+    }).catch(function(){
+      input.select();
+      document.execCommand('copy');
+    });
+  }
 });
-document.getElementById('firebaseConnectBtn').addEventListener('click',connectFirebaseSync);
-document.getElementById('firebasePushBtn').addEventListener('click',pushFirebaseNow);
 document.getElementById('modeTournamentBtn').addEventListener('click',function(){
   setCompetitionMode('tournament');
 });
@@ -5641,7 +6079,7 @@ window.addEventListener('resize',function(){
   refreshBracketLayout();
 });
 initializeRoleFromUrl();
-loadFirebaseSettings();
+initAdminAuth();
 loadRuleInfo();
 if(!isViewerMode()){
   saveRuleInfo();
@@ -5650,65 +6088,6 @@ renderRulesPage();
 updateModeUI();
 renderTimer();
 loadSavedState();
-</script>
-<script type="module">
-import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js';
-
-let firebaseApp=null;
-let firebaseDatabase=null;
-let firebaseRef=null;
-let firebaseUnsubscribe=null;
-
-function safePath(value){
-  return String(value || 'sumabura-main').replace(/[.#$\[\]/]/g,'-').trim() || 'sumabura-main';
-}
-
-window.firebaseTournament={
-  connect:function(options){
-    try{
-      if(firebaseUnsubscribe){
-        firebaseUnsubscribe();
-        firebaseUnsubscribe=null;
-      }
-
-      firebaseApp=getApps().length ? getApps()[0] : initializeApp(options.config);
-      firebaseDatabase=getDatabase(firebaseApp);
-      firebaseRef=ref(firebaseDatabase,'tournaments/'+safePath(options.tournamentId));
-      firebaseUnsubscribe=onValue(firebaseRef,function(snapshot){
-        const value=snapshot.val();
-        if(value && value.state && typeof options.onRemoteState==='function'){
-          options.onRemoteState(value.state);
-        }
-      });
-
-      if(typeof options.onStatus==='function'){
-        options.onStatus('Firebase同期中: 大会ID '+safePath(options.tournamentId),'connected');
-      }
-    }catch(error){
-      if(typeof options.onStatus==='function'){
-        options.onStatus('Firebase接続エラー: '+error.message,'error');
-      }
-    }
-  },
-  save:function(state){
-    if(!firebaseRef){
-      return;
-    }
-
-    set(firebaseRef,{
-      state:state,
-      updatedAt:Date.now()
-    }).catch(function(error){
-      const status=document.getElementById('firebaseStatus');
-      if(status){
-        status.textContent='Firebase保存エラー: '+error.message;
-        status.classList.add('error');
-        status.classList.remove('connected');
-      }
-    });
-  }
-};
 </script>
 </body>
 </html>
