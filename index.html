@@ -2917,62 +2917,6 @@ function setText(id,value){
   }
 }
 
-// ===== Admin password auth =====
-var ADMIN_PW='515f534a47cb0cde';
-var AUTH_SESSION_KEY='sumabraAdminSession.v1';
-
-function isSessionAuthed(){
-  try{return sessionStorage.getItem(AUTH_SESSION_KEY)==='1';}catch(e){return false;}
-}
-function setSessionAuthed(){
-  try{sessionStorage.setItem(AUTH_SESSION_KEY,'1');}catch(e){}
-}
-function isViewerUrl(){
-  var p=new URLSearchParams(window.location.search);
-  var m=p.get('mode')||p.get('role')||p.get('view');
-  return m==='viewer';
-}
-function hideOverlay(){
-  var el=document.getElementById('adminAuthOverlay');
-  if(el){el.style.display='none';}
-}
-function initAdminAuth(){
-  if(isViewerUrl()||isSessionAuthed()){
-    hideOverlay();
-    return;
-  }
-
-  var errorEl=document.getElementById('authError');
-
-  function tryLogin(){
-    var pw=document.getElementById('authPasswordInput').value;
-    if(pw===ADMIN_PW){
-      setSessionAuthed();
-      hideOverlay();
-    }else{
-      if(errorEl){
-        errorEl.textContent=pw.length!==16?'16桁のパスワードを入力してください':'パスワードが正しくありません';
-        errorEl.style.display='block';
-      }
-      document.getElementById('authPasswordInput').value='';
-      document.getElementById('authPasswordInput').focus();
-    }
-  }
-
-  document.getElementById('authSubmitBtn').addEventListener('click',tryLogin);
-  document.getElementById('authPasswordInput').addEventListener('keydown',function(e){
-    if(e.key==='Enter'){tryLogin();}
-  });
-  document.getElementById('authToggleBtn').addEventListener('click',function(){
-    var inp=document.getElementById('authPasswordInput');
-    inp.type=inp.type==='password'?'text':'password';
-  });
-  document.getElementById('authViewerBtn').addEventListener('click',function(){
-    setPageRole('viewer',true);
-    hideOverlay();
-  });
-}
-
 function initializeRoleFromUrl(){
   const params=new URLSearchParams(window.location.search);
   const mode=params.get('mode') || params.get('role') || params.get('view');
@@ -5976,7 +5920,74 @@ renderRulesPage();
 updateModeUI();
 renderTimer();
 loadSavedState();
-initAdminAuth();
+</script>
+
+<script>
+(function(){
+  var ADMIN_PW='515f534a47cb0cde';
+  var SESSION_KEY='sumabraAdminSession.v1';
+
+  function isAuthed(){
+    try{return sessionStorage.getItem(SESSION_KEY)==='1';}catch(e){return false;}
+  }
+  function setAuthed(){
+    try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}
+  }
+  function isViewer(){
+    var p=new URLSearchParams(window.location.search);
+    var m=p.get('mode')||p.get('role')||p.get('view');
+    return m==='viewer';
+  }
+
+  var overlay=document.getElementById('adminAuthOverlay');
+
+  // 認証不要ならオーバーレイを閉じて終了
+  if(isViewer()||isAuthed()){
+    if(overlay){overlay.style.display='none';}
+    return;
+  }
+
+  // オーバーレイを表示
+  if(overlay){overlay.style.display='flex';}
+
+  var errorEl=document.getElementById('authError');
+  var input=document.getElementById('authPasswordInput');
+  var submitBtn=document.getElementById('authSubmitBtn');
+  var viewerBtn=document.getElementById('authViewerBtn');
+  var toggleBtn=document.getElementById('authToggleBtn');
+
+  function tryLogin(){
+    var pw=input?input.value:'';
+    if(pw===ADMIN_PW){
+      setAuthed();
+      if(overlay){overlay.style.display='none';}
+    }else{
+      if(errorEl){
+        errorEl.textContent=pw.length!==16?'16桁のパスワードを入力してください':'パスワードが正しくありません';
+        errorEl.style.display='block';
+      }
+      if(input){input.value='';input.focus();}
+    }
+  }
+
+  if(submitBtn){submitBtn.addEventListener('click',tryLogin);}
+  if(input){
+    input.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){tryLogin();}
+    });
+  }
+  if(toggleBtn){
+    toggleBtn.addEventListener('click',function(){
+      if(input){input.type=input.type==='password'?'text':'password';}
+    });
+  }
+  if(viewerBtn){
+    viewerBtn.addEventListener('click',function(){
+      if(overlay){overlay.style.display='none';}
+      if(typeof setPageRole==='function'){setPageRole('viewer',true);}
+    });
+  }
+})();
 </script>
 </body>
 </html>
