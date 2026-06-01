@@ -4483,6 +4483,7 @@ body.light-mode .match-matrix thead th{
 let names=[];
 let bracketRounds=[];
 let doubleBracket=null;
+let doubleAutoAdvancing=false;
 let bracketSize=2;
 let leagueRounds=[];
 let lastCelebratedWinner='';
@@ -5531,7 +5532,43 @@ function buildDoubleBracket(){
     roundIndex+=1;
   }
 
+  buildDoubleLoserRounds();
   processDoubleByes();
+}
+
+function buildDoubleLoserRounds(){
+  const winnerRoundCount=doubleBracket.winnerRounds.length;
+  const loserRoundCount=Math.max(0,(winnerRoundCount-1)*2);
+
+  doubleBracket.loserRounds=[];
+
+  for(let loserRoundIndex=0;loserRoundIndex<loserRoundCount;loserRoundIndex+=1){
+    const matchCount=Math.max(1,bracketSize/Math.pow(2,Math.floor(loserRoundIndex/2)+2));
+    doubleBracket.loserRounds.push(Array.from({length:matchCount},function(_,matchIndex){
+      return createDoubleMatch('loser',loserRoundIndex,matchIndex,null,null);
+    }));
+  }
+
+  doubleBracket.loserRounds.forEach(function(round,loserRoundIndex){
+    round.forEach(function(match,matchIndex){
+      if(loserRoundIndex===0){
+        match.sources=[
+          {type:'winnerLoser',roundIndex:0,matchIndex:matchIndex*2},
+          {type:'winnerLoser',roundIndex:0,matchIndex:matchIndex*2+1}
+        ];
+      }else if(loserRoundIndex%2===1){
+        match.sources=[
+          {type:'loserWinner',roundIndex:loserRoundIndex-1,matchIndex:matchIndex},
+          {type:'winnerLoser',roundIndex:(loserRoundIndex+1)/2,matchIndex:matchIndex}
+        ];
+      }else{
+        match.sources=[
+          {type:'loserWinner',roundIndex:loserRoundIndex-1,matchIndex:matchIndex*2},
+          {type:'loserWinner',roundIndex:loserRoundIndex-1,matchIndex:matchIndex*2+1}
+        ];
+      }
+    });
+  });
 }
 
 function createInitialDoubleRound(players,size){
@@ -5564,7 +5601,9 @@ function createDoubleMatch(stage,roundIndex,matchIndex,playerA,playerB){
     players:[playerA,playerB],
     winner:null,
     loser:null,
-    bye:false
+    bye:false,
+    skipped:false,
+    sources:[null,null]
   };
 }
 
@@ -5742,7 +5781,7 @@ function renderDoubleBracket(){
     bracket.appendChild(createDoubleRoundColumn('敗者側 '+(roundIndex+1)+'回戦',round,'loser'));
   });
 
-  if(doubleBracket.loserQueue.length>0){
+  if(doubleBracket.loserQueue && doubleBracket.loserQueue.length>0){
     bracket.appendChild(createDoubleQueueColumn());
   }
 
@@ -5872,8 +5911,8 @@ function createDoubleSlot(match,slotIndex){
   status.className='status';
 
   if(!player){
-    name.textContent=match.stage==='queue' ? '待機なし' : '勝者待ち';
-    status.textContent='待機';
+    name.textContent=match.skipped ? '該当者なし' : (match.stage==='queue' ? '待機なし' : '勝者待ち');
+    status.textContent=match.skipped ? 'スキップ' : '待機';
     slot.classList.add('waiting');
     slot.disabled=true;
   }else{
@@ -6036,6 +6075,8 @@ function processDoubleByes(){
       placeDoubleWinner(match,'winner',players[0]);
     }
   });
+
+  autoAdvanceDoubleLoserByes();
 }
 
 function selectDoubleWinner(stage,roundIndex,matchIndex,slotIndex){
@@ -6092,7 +6133,7 @@ function placeDoubleWinner(match,stage,winner){
   if(stage==='winner'){
     if(match.roundIndex>=doubleBracket.winnerRounds.length-1){
       doubleBracket.grandFinal.players[0]=winner;
-      maybePlaceLoserChampionInGrandFinal();
+      autoAdvanceDoubleLoserByes();
       return;
     }
 
@@ -6104,8 +6145,22 @@ function placeDoubleWinner(match,stage,winner){
   }
 
   if(stage==='loser'){
-    addDoubleLoserQueue(winner);
-    maybePlaceLoserChampionInGrandFinal();
+    if(match.roundIndex>=doubleBracket.loserRounds.length-1){
+      doubleBracket.grandFinal.players[1]=winner;
+      return;
+    }
+
+    const nextRound=match.roundIndex+1;
+    let nextMatch=match.matchIndex;
+    let nextSlot=0;
+
+    if(match.roundIndex%2===1){
+      nextMatch=Math.floor(match.matchIndex/2);
+      nextSlot=match.matchIndex%2;
+    }
+
+    placeDoublePlayer(doubleBracket.loserRounds[nextRound] && doubleBracket.loserRounds[nextRound][nextMatch],nextSlot,winner);
+    autoAdvanceDoubleLoserByes();
     return;
   }
 
@@ -6126,7 +6181,29 @@ function placeDoubleWinner(match,stage,winner){
 
 function placeDoubleLoser(match,stage,loser){
   if(stage==='winner'){
-    addDoubleLoserQueue(loser);
+    const winnerRoundCount=doubleBracket.winnerRounds.length;
+
+    if(match.roundIndex>=winnerRoundCount-1){
+      if(doubleBracket.loserRounds.length===0){
+        doubleBracket.grandFinal.players[1]=loser;
+      }else{
+        const losersFinal=doubleBracket.loserRounds[doubleBracket.loserRounds.length-1][0];
+        placeDoublePlayer(losersFinal,1,loser);
+      }
+      autoAdvanceDoubleLoserByes();
+      return;
+    }
+
+    if(match.roundIndex===0){
+      const loserMatch=doubleBracket.loserRounds[0] && doubleBracket.loserRounds[0][Math.floor(match.matchIndex/2)];
+      placeDoublePlayer(loserMatch,match.matchIndex%2,loser);
+    }else{
+      const loserRoundIndex=match.roundIndex*2-1;
+      const loserMatch=doubleBracket.loserRounds[loserRoundIndex] && doubleBracket.loserRounds[loserRoundIndex][match.matchIndex];
+      placeDoublePlayer(loserMatch,1,loser);
+    }
+
+    autoAdvanceDoubleLoserByes();
     return;
   }
 
@@ -6151,59 +6228,85 @@ function placeDoubleLoser(match,stage,loser){
   }
 }
 
-function addDoubleLoserQueue(player){
-  if(!player || doubleBracket.champion || doubleBracket.eliminated.includes(player)){
+function placeDoublePlayer(match,slotIndex,player){
+  if(!match || !player || slotIndex<0 || slotIndex>1){
     return;
   }
 
-  const alreadyQueued=doubleBracket.loserQueue.includes(player);
-  const alreadyInPending=doubleBracket.loserRounds.some(function(round){
-    return round.some(function(match){
-      return !match.winner && match.players.includes(player);
-    });
-  });
+  if(!match.players[slotIndex]){
+    match.players[slotIndex]=player;
+  }
+}
 
-  if(!alreadyQueued && !alreadyInPending && doubleBracket.grandFinal.players[1]!==player){
+function isDoubleSourceComplete(source){
+  if(!source){
+    return true;
+  }
+
+  if(source.type==='winnerLoser'){
+    const match=doubleBracket.winnerRounds[source.roundIndex] && doubleBracket.winnerRounds[source.roundIndex][source.matchIndex];
+    return !match || Boolean(match.winner);
+  }
+
+  if(source.type==='loserWinner'){
+    const match=doubleBracket.loserRounds[source.roundIndex] && doubleBracket.loserRounds[source.roundIndex][source.matchIndex];
+    return !match || Boolean(match.winner || match.skipped);
+  }
+
+  return true;
+}
+
+function areDoubleMatchSourcesComplete(match){
+  const sources=match.sources || [null,null];
+  return isDoubleSourceComplete(sources[0]) && isDoubleSourceComplete(sources[1]);
+}
+
+function autoAdvanceDoubleLoserByes(){
+  if(!doubleBracket || doubleAutoAdvancing){
+    return;
+  }
+
+  doubleAutoAdvancing=true;
+
+  try{
+    let changed=true;
+    while(changed){
+      changed=false;
+      doubleBracket.loserRounds.forEach(function(round){
+        round.forEach(function(match){
+          if(match.winner || match.skipped || !areDoubleMatchSourcesComplete(match)){
+            return;
+          }
+
+          const players=match.players.filter(Boolean);
+
+          if(players.length===1){
+            match.winner=players[0];
+            match.bye=true;
+            placeDoubleWinner(match,'loser',players[0]);
+            changed=true;
+          }else if(players.length===0){
+            match.skipped=true;
+            changed=true;
+          }
+        });
+      });
+    }
+  }finally{
+    doubleAutoAdvancing=false;
+  }
+}
+
+function addDoubleLoserQueue(player){
+  // 旧保存データ互換用。新しいダブルエリミネーションでは固定の敗者側表へ直接配置します。
+  if(player && doubleBracket && Array.isArray(doubleBracket.loserQueue) && !doubleBracket.loserQueue.includes(player)){
     doubleBracket.loserQueue.push(player);
   }
-
-  createDoubleLoserMatches();
 }
 
-function createDoubleLoserMatches(){
-  if(!doubleBracket || doubleBracket.loserQueue.length<2){
-    maybePlaceLoserChampionInGrandFinal();
-    return;
-  }
-
-  const roundIndex=doubleBracket.loserRounds.length;
-  const round=[];
-
-  while(doubleBracket.loserQueue.length>=2){
-    const playerA=doubleBracket.loserQueue.shift();
-    const playerB=doubleBracket.loserQueue.shift();
-    round.push(createDoubleMatch('loser',roundIndex,round.length,playerA,playerB));
-  }
-
-  if(round.length>0){
-    doubleBracket.loserRounds.push(round);
-  }
-}
-
+function createDoubleLoserMatches(){}
 function maybePlaceLoserChampionInGrandFinal(){
-  if(!doubleBracket || !doubleBracket.grandFinal.players[0] || doubleBracket.grandFinal.players[1]){
-    return;
-  }
-
-  const pendingLoserMatches=doubleBracket.loserRounds.some(function(round){
-    return round.some(function(match){
-      return match.players[0] && match.players[1] && !match.winner;
-    });
-  });
-
-  if(!pendingLoserMatches && doubleBracket.loserQueue.length===1){
-    doubleBracket.grandFinal.players[1]=doubleBracket.loserQueue.shift();
-  }
+  autoAdvanceDoubleLoserByes();
 }
 
 function getDoublePendingMatchCount(){
@@ -6378,7 +6481,7 @@ function renderDoubleHistory(historyBox){
     ['形式','ダブルエリミネーション'],
     ['勝者側',getDoubleDecidedCount(doubleBracket.winnerRounds)+' / '+getDoubleTotalCount(doubleBracket.winnerRounds)],
     ['敗者側',getDoubleDecidedCount(doubleBracket.loserRounds)+' / '+getDoubleTotalCount(doubleBracket.loserRounds)],
-    ['敗者側待機',doubleBracket.loserQueue.length+'名'],
+    ['敗者側形式','固定ブラケット'],
     ['2敗退',doubleBracket.eliminated.length+'名'],
     ['Grand Final',doubleBracket.grandFinal.winner ? '1 / 1' : '0 / 1'],
     ['Reset Final',doubleBracket.grandFinalReset ? (doubleBracket.grandFinalReset.winner ? '1 / 1' : '0 / 1') : '未発生']
@@ -6403,7 +6506,7 @@ function getDoubleTotalCount(rounds){
 
 function getDoubleDecidedCount(rounds){
   return rounds.reduce(function(sum,round){
-    return sum+round.filter(function(match){return match.winner;}).length;
+    return sum+round.filter(function(match){return match.winner || match.skipped;}).length;
   },0);
 }
 
@@ -9196,6 +9299,15 @@ function applyPersistedState(state){
     if(!doubleBracket.grandFinal){doubleBracket.grandFinal=createDoubleMatch('grand',0,0,null,null);}
     if(!Object.prototype.hasOwnProperty.call(doubleBracket,'grandFinalReset')){doubleBracket.grandFinalReset=null;}
     if(!Object.prototype.hasOwnProperty.call(doubleBracket,'champion')){doubleBracket.champion=null;}
+    const hasFixedLoserSources=doubleBracket.loserRounds.every(function(round){
+      return round.every(function(match){
+        return Array.isArray(match.sources) && match.sources.length===2;
+      });
+    });
+    if(eliminationMode==='double' && doubleBracket.loserRounds.length>0 && !hasFixedLoserSources){
+      doubleBracket=null;
+      bracketRounds=[];
+    }
   }
   // 古いデータでwinnerRoundsが不完全な場合は再生成
   if(doubleBracket && Array.isArray(doubleBracket.winnerRounds)){
@@ -9256,7 +9368,7 @@ function applyPersistedState(state){
   }
 
   if((competitionMode==='league' && leagueRounds.length>0) ||
-    (competitionMode==='tournament' && (bracketRounds.length>0 || doubleBracket))){
+    (competitionMode==='tournament' && (bracketRounds.length>0 || doubleBracket || (eliminationMode==='double' && names.length>1 && state.phase==='bracketPage')))){
     show('bracketPage');
     renderBracket();
   }else if(names.length>0 && state.phase==='register' && !isViewerMode()){
