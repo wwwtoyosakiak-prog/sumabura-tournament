@@ -2329,7 +2329,7 @@ body.viewer-mode .ready{
 <body>
 
 <!-- ===== 管理者パスワード認証オーバーレイ ===== -->
-<div id="adminAuthOverlay" class="hidden">
+<div id="adminAuthOverlay" style="display:flex;position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at 18% 8%,rgba(227,59,50,.32),transparent 30%),radial-gradient(circle at 86% 12%,rgba(244,196,78,.16),transparent 28%),linear-gradient(145deg,#140707 0%,#060607 52%,#15100a 100%);align-items:center;justify-content:center;padding:20px;">
   <div class="auth-box">
     <div class="auth-logo">
       <div class="auth-logo-icon">S</div>
@@ -2338,36 +2338,15 @@ body.viewer-mode .ready{
         <div class="auth-sub">スマブラ大会 — 運営専用</div>
       </div>
     </div>
-
-    <div id="authLoginSection">
-      <label class="auth-label" for="authPasswordInput">パスワード（16桁）</label>
-      <div class="auth-input-wrap">
-        <input id="authPasswordInput" type="password" maxlength="16" autocomplete="off" placeholder="••••••••••••••••">
-        <button id="authToggleBtn" class="auth-toggle" type="button" title="表示切り替え">👁</button>
-      </div>
-      <div id="authError" class="auth-error">パスワードが正しくありません</div>
-      <div class="auth-actions">
-        <button id="authSubmitBtn" class="btn" type="button">ログイン</button>
-        <button id="authViewerBtn" class="btn secondary" type="button">閲覧者として続ける</button>
-      </div>
+    <label class="auth-label" for="authPasswordInput">パスワード（16桁）</label>
+    <div class="auth-input-wrap">
+      <input id="authPasswordInput" type="password" maxlength="16" autocomplete="off" placeholder="••••••••••••••••">
+      <button id="authToggleBtn" class="auth-toggle" type="button">👁</button>
     </div>
-
-    <div id="authSetSection" style="display:none">
-      <div class="auth-hint">初回アクセスです。管理者パスワードを設定してください。<br>16桁の英数字を入力してください。</div>
-      <label class="auth-label" for="authSetInput">新しいパスワード（16桁）</label>
-      <div class="auth-input-wrap">
-        <input id="authSetInput" type="password" maxlength="16" autocomplete="new-password" placeholder="••••••••••••••••">
-        <button id="authSetToggleBtn" class="auth-toggle" type="button" title="表示切り替え">👁</button>
-      </div>
-      <label class="auth-label" for="authConfirmInput">確認（もう一度入力）</label>
-      <div class="auth-input-wrap">
-        <input id="authConfirmInput" type="password" maxlength="16" autocomplete="new-password" placeholder="••••••••••••••••">
-      </div>
-      <div id="authSetError" class="auth-error">パスワードが一致しません</div>
-      <div class="auth-actions">
-        <button id="authSetSubmitBtn" class="btn" type="button">パスワードを設定する</button>
-        <button id="authViewerBtn2" class="btn secondary" type="button">閲覧者として続ける</button>
-      </div>
+    <div id="authError" style="display:none;color:#ff8b82;font-size:13px;font-weight:900;margin-bottom:12px;padding:10px 12px;border-radius:8px;background:rgba(227,59,50,.12);border:1px solid rgba(227,59,50,.35);"></div>
+    <div class="auth-actions">
+      <button id="authSubmitBtn" class="btn" type="button">ログイン</button>
+      <button id="authViewerBtn" class="btn secondary" type="button">閲覧者として続ける</button>
     </div>
   </div>
 </div>
@@ -2939,148 +2918,58 @@ function setText(id,value){
 }
 
 // ===== Admin password auth =====
-const AUTH_KEY='sumabraAdminAuth.v1';
-const AUTH_SESSION_KEY='sumabraAdminSession.v1';
-
-async function sha256hex(text){
-  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
-}
-
-function getStoredPasswordHash(){
-  try{return localStorage.getItem(AUTH_KEY) || null}catch(e){return null}
-}
-
-function storePasswordHash(hash){
-  try{localStorage.setItem(AUTH_KEY,hash)}catch(e){}
-}
+var ADMIN_PW='515f534a47cb0cde';
+var AUTH_SESSION_KEY='sumabraAdminSession.v1';
 
 function isSessionAuthed(){
-  try{return sessionStorage.getItem(AUTH_SESSION_KEY)==='1'}catch(e){return false}
+  try{return sessionStorage.getItem(AUTH_SESSION_KEY)==='1';}catch(e){return false;}
 }
-
 function setSessionAuthed(){
-  try{sessionStorage.setItem(AUTH_SESSION_KEY,'1')}catch(e){}
+  try{sessionStorage.setItem(AUTH_SESSION_KEY,'1');}catch(e){}
 }
-
-function showAuthError(id,msg){
-  const el=document.getElementById(id);
-  if(el){el.textContent=msg;el.style.display='block'}
+function isViewerUrl(){
+  var p=new URLSearchParams(window.location.search);
+  var m=p.get('mode')||p.get('role')||p.get('view');
+  return m==='viewer';
 }
-
-function hideAuthError(id){
-  const el=document.getElementById(id);
-  if(el){el.style.display='none'}
+function hideOverlay(){
+  var el=document.getElementById('adminAuthOverlay');
+  if(el){el.style.display='none';}
 }
-
-function dismissAuthOverlay(){
-  const overlay=document.getElementById('adminAuthOverlay');
-  if(overlay){overlay.classList.add('hidden')}
-}
-
-async function initAdminAuth(){
-  const params=new URLSearchParams(window.location.search);
-  const mode=params.get('mode') || params.get('role') || params.get('view');
-
-  // 閲覧者URLは認証不要
-  if(mode==='viewer'){
-    dismissAuthOverlay();
+function initAdminAuth(){
+  if(isViewerUrl()||isSessionAuthed()){
+    hideOverlay();
     return;
   }
 
-  // セッション中に認証済みなら即通過
-  if(isSessionAuthed()){
-    dismissAuthOverlay();
-    return;
-  }
+  var errorEl=document.getElementById('authError');
 
-  const storedHash=getStoredPasswordHash();
-  const overlay=document.getElementById('adminAuthOverlay');
-  const loginSection=document.getElementById('authLoginSection');
-  const setSection=document.getElementById('authSetSection');
-
-  if(overlay){overlay.classList.remove('hidden')}
-
-  if(!storedHash){
-    // 未設定: パスワード設定画面
-    if(loginSection){loginSection.style.display='none'}
-    if(setSection){setSection.style.display='block'}
-  } else {
-    // 設定済み: ログイン画面
-    if(loginSection){loginSection.style.display='block'}
-    if(setSection){setSection.style.display='none'}
-  }
-
-  // ログイン
-  document.getElementById('authSubmitBtn').addEventListener('click',async function(){
-    const pw=document.getElementById('authPasswordInput').value;
-    if(pw.length!==16){
-      showAuthError('authError','16桁のパスワードを入力してください');
-      return;
-    }
-    const hash=await sha256hex(pw);
-    if(hash===getStoredPasswordHash()){
+  function tryLogin(){
+    var pw=document.getElementById('authPasswordInput').value;
+    if(pw===ADMIN_PW){
       setSessionAuthed();
-      dismissAuthOverlay();
-      hideAuthError('authError');
-    } else {
-      showAuthError('authError','パスワードが正しくありません');
+      hideOverlay();
+    }else{
+      if(errorEl){
+        errorEl.textContent=pw.length!==16?'16桁のパスワードを入力してください':'パスワードが正しくありません';
+        errorEl.style.display='block';
+      }
       document.getElementById('authPasswordInput').value='';
       document.getElementById('authPasswordInput').focus();
     }
-  });
+  }
 
+  document.getElementById('authSubmitBtn').addEventListener('click',tryLogin);
   document.getElementById('authPasswordInput').addEventListener('keydown',function(e){
-    if(e.key==='Enter'){document.getElementById('authSubmitBtn').click()}
+    if(e.key==='Enter'){tryLogin();}
   });
-
-  // 表示トグル
   document.getElementById('authToggleBtn').addEventListener('click',function(){
-    const inp=document.getElementById('authPasswordInput');
-    inp.type=inp.type==='password' ? 'text' : 'password';
+    var inp=document.getElementById('authPasswordInput');
+    inp.type=inp.type==='password'?'text':'password';
   });
-
-  // 閲覧者として続ける
   document.getElementById('authViewerBtn').addEventListener('click',function(){
-    dismissAuthOverlay();
     setPageRole('viewer',true);
-  });
-
-  // パスワード設定
-  document.getElementById('authSetSubmitBtn').addEventListener('click',async function(){
-    const pw=document.getElementById('authSetInput').value;
-    const confirm=document.getElementById('authConfirmInput').value;
-    if(pw.length!==16){
-      showAuthError('authSetError','16桁のパスワードを入力してください');
-      return;
-    }
-    if(pw!==confirm){
-      showAuthError('authSetError','パスワードが一致しません');
-      return;
-    }
-    const hash=await sha256hex(pw);
-    storePasswordHash(hash);
-    setSessionAuthed();
-    dismissAuthOverlay();
-    hideAuthError('authSetError');
-  });
-
-  document.getElementById('authSetInput').addEventListener('keydown',function(e){
-    if(e.key==='Enter'){document.getElementById('authConfirmInput').focus()}
-  });
-
-  document.getElementById('authConfirmInput').addEventListener('keydown',function(e){
-    if(e.key==='Enter'){document.getElementById('authSetSubmitBtn').click()}
-  });
-
-  document.getElementById('authSetToggleBtn').addEventListener('click',function(){
-    const inp=document.getElementById('authSetInput');
-    inp.type=inp.type==='password' ? 'text' : 'password';
-  });
-
-  document.getElementById('authViewerBtn2').addEventListener('click',function(){
-    dismissAuthOverlay();
-    setPageRole('viewer',true);
+    hideOverlay();
   });
 }
 
@@ -6079,7 +5968,6 @@ window.addEventListener('resize',function(){
   refreshBracketLayout();
 });
 initializeRoleFromUrl();
-initAdminAuth();
 loadRuleInfo();
 if(!isViewerMode()){
   saveRuleInfo();
@@ -6088,6 +5976,7 @@ renderRulesPage();
 updateModeUI();
 renderTimer();
 loadSavedState();
+initAdminAuth();
 </script>
 </body>
 </html>
