@@ -313,6 +313,113 @@ input:focus,textarea:focus,select:focus{
   font-weight:900;
 }
 
+.role-panel{
+  display:grid;
+  grid-template-columns:auto minmax(180px,1fr);
+  gap:12px;
+  align-items:center;
+  margin-bottom:18px;
+  padding:12px;
+}
+
+.role-switch{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.role-switch button{
+  min-height:40px;
+  padding:9px 12px;
+  border-radius:8px;
+  color:var(--muted);
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+  cursor:pointer;
+  font-size:13px;
+  font-weight:900;
+}
+
+.role-switch button.active{
+  color:#140a00;
+  background:linear-gradient(135deg,var(--gold),#fff0b6);
+}
+
+.role-info{
+  display:grid;
+  gap:6px;
+  min-width:0;
+}
+
+.role-info strong{
+  color:var(--gold-2);
+  font-size:14px;
+}
+
+.role-info input{
+  min-height:38px;
+  padding:8px 10px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+}
+
+.firebase-panel{
+  display:grid;
+  gap:12px;
+  margin-bottom:18px;
+  padding:14px;
+}
+
+.firebase-panel h2{
+  color:var(--gold-2);
+  font-size:18px;
+}
+
+.firebase-grid{
+  display:grid;
+  grid-template-columns:minmax(160px,.35fr) minmax(260px,1fr) auto auto;
+  gap:10px;
+  align-items:end;
+}
+
+.firebase-grid textarea{
+  min-height:84px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.firebase-status{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+}
+
+.firebase-status.connected{
+  color:var(--green);
+}
+
+.firebase-status.error{
+  color:#ff8b82;
+}
+
+body.viewer-mode .admin-only,
+body.viewer-mode .placement-actions{
+  display:none!important;
+}
+
+body.viewer-mode .viewer-allowed{
+  display:block!important;
+}
+
+body.viewer-mode .timer-controls{
+  grid-template-columns:1fr;
+}
+
+body.viewer-mode .ready{
+  cursor:default;
+}
+
 .timer-panel{
   display:grid;
   grid-template-columns:auto minmax(180px,1fr) auto;
@@ -1985,6 +2092,34 @@ input:focus,textarea:focus,select:focus{
     </nav>
   </header>
 
+  <section class="panel role-panel" aria-label="ページ切り替え">
+    <div class="role-switch">
+      <button id="adminPageBtn" type="button">管理者ページ</button>
+      <button id="viewerPageBtn" type="button">閲覧者ページ</button>
+    </div>
+    <div class="role-info">
+      <strong id="roleStatus">管理者ページ</strong>
+      <input id="viewerUrl" type="text" readonly aria-label="閲覧者ページURL">
+    </div>
+  </section>
+
+  <section class="panel firebase-panel" aria-label="Firebase同期設定">
+    <h2>Firebase同期</h2>
+    <div class="firebase-grid">
+      <div>
+        <label class="label" for="firebaseTournamentId">大会ID</label>
+        <input id="firebaseTournamentId" type="text" value="sumabura-main" autocomplete="off">
+      </div>
+      <div class="admin-only viewer-allowed">
+        <label class="label" for="firebaseConfigInput">Firebase設定JSON</label>
+        <textarea id="firebaseConfigInput" autocomplete="off" placeholder='{"apiKey":"...","authDomain":"...","databaseURL":"...","projectId":"...","appId":"..."}'></textarea>
+      </div>
+      <button id="firebaseConnectBtn" class="btn red" type="button">同期開始</button>
+      <button id="firebasePushBtn" class="btn secondary admin-only" type="button">今すぐ反映</button>
+    </div>
+    <div id="firebaseStatus" class="firebase-status">未接続: Firebase設定JSONと大会IDを入力してください</div>
+  </section>
+
   <section id="timerPanel" class="panel timer-panel" aria-label="大会タイマー">
     <div class="timer-title">
       <h2>大会タイマー</h2>
@@ -1992,13 +2127,13 @@ input:focus,textarea:focus,select:focus{
     </div>
     <div id="timerDisplay" class="timer-display">70:00</div>
     <div class="timer-controls">
-      <div class="timer-input">
+      <div class="timer-input admin-only">
         <label for="timerMinutes">時間設定</label>
         <input id="timerMinutes" type="number" min="1" max="999" value="70" inputmode="numeric">
       </div>
-      <button id="timerStartBtn" class="btn red" type="button">開始</button>
-      <button id="timerPauseBtn" class="btn secondary" type="button">一時停止</button>
-      <button id="timerResetBtn" class="btn secondary" type="button">リセット</button>
+      <button id="timerStartBtn" class="btn red admin-only" type="button">開始</button>
+      <button id="timerPauseBtn" class="btn secondary admin-only" type="button">一時停止</button>
+      <button id="timerResetBtn" class="btn secondary admin-only" type="button">リセット</button>
       <div id="timerStatus" class="timer-status">70分に設定されています</div>
     </div>
   </section>
@@ -2009,14 +2144,14 @@ input:focus,textarea:focus,select:focus{
       <h2 class="start-title">スマブラ大会</h2>
       <p class="lead">参加人数を入力して大会を開始してください。4人1組のマッチで対戦し、順位ポイントで総合順位を決めます。</p>
 
-      <div class="field-grid">
+      <div class="field-grid admin-only">
         <div>
           <label class="label" for="count">参加人数</label>
           <input id="count" type="number" min="1" max="32" value="8" inputmode="numeric">
         </div>
         <button id="startBtn" class="btn red">大会開始</button>
       </div>
-      <div class="mode-switch" aria-label="大会形式切り替え">
+      <div class="mode-switch admin-only" aria-label="大会形式切り替え">
         <button id="modeTournamentBtn" type="button">トーナメント</button>
         <button id="modeLeagueBtn" type="button">4人ポイント</button>
       </div>
@@ -2031,7 +2166,7 @@ input:focus,textarea:focus,select:focus{
     <div class="header">
       <button id="backFromRulesBtn" class="back" type="button">← スタートへ</button>
       <h2>ルール・大会情報</h2>
-      <button id="adminModeBtn" class="back" type="button">管理モード ON</button>
+      <button id="adminModeBtn" class="back admin-only" type="button">管理モード ON</button>
     </div>
 
     <div class="rule-hero">
@@ -2039,7 +2174,7 @@ input:focus,textarea:focus,select:focus{
         <span class="eyebrow">TOURNAMENT INFO</span>
         <h2 id="ruleTournamentName" class="rule-title">第1回ゼミスマブラ大会</h2>
         <p id="ruleGameName" class="lead">大乱闘スマッシュブラザーズ SPECIAL</p>
-        <div class="mode-switch compact" aria-label="ルールパターン切り替え">
+        <div class="mode-switch compact admin-only" aria-label="ルールパターン切り替え">
           <button id="ruleTournamentModeBtn" type="button">トーナメント用</button>
           <button id="ruleLeagueModeBtn" type="button">4人ポイント用</button>
         </div>
@@ -2141,7 +2276,7 @@ input:focus,textarea:focus,select:focus{
 
   <section id="register" class="phase">
     <div class="layout">
-      <main class="panel main-panel">
+      <main class="panel main-panel admin-only">
         <div class="header">
           <button id="backSetupBtn" class="back">← 戻る</button>
           <h2>参加者登録</h2>
@@ -2162,11 +2297,11 @@ input:focus,textarea:focus,select:focus{
           <div class="stat"><span>参加者</span><strong id="statPlayers">0</strong></div>
           <div class="stat"><span id="statSlotsLabel">総試合数</span><strong id="statSlots">0</strong></div>
         </div>
-        <div class="mode-switch compact" aria-label="大会形式切り替え">
+        <div class="mode-switch compact admin-only" aria-label="大会形式切り替え">
           <button id="registerModeTournamentBtn" type="button">トーナメント</button>
           <button id="registerModeLeagueBtn" type="button">4人ポイント</button>
         </div>
-        <div id="leagueSettings" class="league-settings">
+        <div id="leagueSettings" class="league-settings admin-only">
           <label class="label" for="leagueMatchLimit">合計試合数</label>
           <input id="leagueMatchLimit" type="number" min="1" max="999" inputmode="numeric" placeholder="合計試合数を入力してください">
           <div id="leagueMatchWarn" class="warning">⚠ 合計試合数を入力してください</div>
@@ -2178,9 +2313,9 @@ input:focus,textarea:focus,select:focus{
 
   <section id="bracketPage" class="phase">
     <div class="header">
-      <button id="backRegisterBtn" class="back">← 参加者登録へ</button>
+      <button id="backRegisterBtn" class="back admin-only">← 参加者登録へ</button>
       <h2>4人マッチ ポイント表</h2>
-      <button id="resetBtn" class="back">最初からやり直す</button>
+      <button id="resetBtn" class="back admin-only">最初からやり直す</button>
     </div>
 
     <div id="champion" class="panel champion">
@@ -2206,7 +2341,7 @@ input:focus,textarea:focus,select:focus{
               <button id="zoomBracketViewBtn" class="btn secondary" type="button">表形式</button>
             </div>
             <button id="broadcastBtn" class="btn secondary" type="button">配信用表示</button>
-            <button id="clearSaveBtn" class="btn secondary" type="button">保存データを削除して最初から</button>
+            <button id="clearSaveBtn" class="btn secondary admin-only" type="button">保存データを削除して最初から</button>
             <div id="saveStatusTop" class="save-status toolbar-save-status" data-save-status>保存状態: 未保存</div>
           </div>
         </div>
@@ -2293,15 +2428,22 @@ let rulesAdminMode=false;
 let zoomViewMode='list';
 let competitionMode='tournament';
 let leagueMatchLimit='';
+let pageRole='admin';
 let timerDurationSeconds=70*60;
 let timerRemainingSeconds=70*60;
 let timerEndAt=null;
 let timerRunning=false;
 let timerIntervalId=null;
 let timerAlarmPlayed=false;
+let firebaseTournamentId='sumabura-main';
+let firebaseConfigText='';
+let firebaseApplyingRemote=false;
+let firebaseConnected=false;
+let lastFirebaseWriteStamp='';
 
 const STORAGE_KEY='sumaburaTournamentState.v1';
 const RULES_STORAGE_KEY='sumaburaTournamentRules.v1';
+const FIREBASE_SETTINGS_KEY='sumaburaFirebaseSettings.v1';
 
 const tournamentDefaultRuleInfo={
   gameName:'大乱闘スマッシュブラザーズ SPECIAL',
@@ -2408,6 +2550,204 @@ function setText(id,value){
   }
 }
 
+function initializeRoleFromUrl(){
+  const params=new URLSearchParams(window.location.search);
+  const role=params.get('role') || params.get('view') || window.location.hash.replace('#','');
+  pageRole=role==='viewer' ? 'viewer' : 'admin';
+  setPageRole(pageRole,false);
+}
+
+function isViewerMode(){
+  return pageRole==='viewer';
+}
+
+function setPageRole(role,updateUrl){
+  pageRole=role==='viewer' ? 'viewer' : 'admin';
+  document.body.classList.toggle('viewer-mode',isViewerMode());
+
+  const adminButton=document.getElementById('adminPageBtn');
+  const viewerButton=document.getElementById('viewerPageBtn');
+  const status=document.getElementById('roleStatus');
+  const viewerUrl=document.getElementById('viewerUrl');
+
+  if(adminButton){
+    adminButton.classList.toggle('active',!isViewerMode());
+  }
+
+  if(viewerButton){
+    viewerButton.classList.toggle('active',isViewerMode());
+  }
+
+  if(status){
+    status.textContent=isViewerMode()
+      ? '閲覧者ページ: 編集と結果入力はできません'
+      : '管理者ページ: 参加者登録・結果入力ができます';
+  }
+
+  if(viewerUrl){
+    viewerUrl.value=getViewerPageUrl();
+  }
+
+  if(updateUrl){
+    const url=new URL(window.location.href);
+    if(isViewerMode()){
+      url.searchParams.set('role','viewer');
+    }else{
+      url.searchParams.delete('role');
+      url.searchParams.delete('view');
+    }
+    window.history.replaceState(null,'',url.toString());
+  }
+
+  if(isViewerMode() && getActivePhaseId()==='setup'){
+    if((competitionMode==='league' && leagueRounds.length>0) ||
+      (competitionMode==='tournament' && bracketRounds.length>0)){
+      show('bracketPage');
+    }else{
+      show('rulesPage');
+    }
+  }
+
+  renderRulesPage();
+  updateBroadcastPanel();
+}
+
+function getViewerPageUrl(){
+  const url=new URL(window.location.href);
+  url.searchParams.set('role','viewer');
+  return url.toString();
+}
+
+function loadFirebaseSettings(){
+  const storage=getStorage();
+  if(!storage){
+    return;
+  }
+
+  try{
+    const raw=storage.getItem(FIREBASE_SETTINGS_KEY);
+    if(!raw){
+      return;
+    }
+    const settings=JSON.parse(raw);
+    firebaseTournamentId=settings.tournamentId || firebaseTournamentId;
+    firebaseConfigText=settings.configText || '';
+    updateFirebaseInputs();
+  }catch(error){
+    storage.removeItem(FIREBASE_SETTINGS_KEY);
+  }
+}
+
+function saveFirebaseSettings(){
+  const storage=getStorage();
+  if(!storage){
+    return;
+  }
+
+  storage.setItem(FIREBASE_SETTINGS_KEY,JSON.stringify({
+    tournamentId:firebaseTournamentId,
+    configText:firebaseConfigText,
+    updatedAt:new Date().toISOString()
+  }));
+}
+
+function updateFirebaseInputs(){
+  const idInput=document.getElementById('firebaseTournamentId');
+  const configInput=document.getElementById('firebaseConfigInput');
+
+  if(idInput && idInput.value!==firebaseTournamentId){
+    idInput.value=firebaseTournamentId;
+  }
+
+  if(configInput && configInput.value!==firebaseConfigText){
+    configInput.value=firebaseConfigText;
+  }
+}
+
+function setFirebaseStatus(message,type){
+  const status=document.getElementById('firebaseStatus');
+  firebaseConnected=type==='connected' ? true : type==='error' ? false : firebaseConnected;
+  if(!status){
+    return;
+  }
+
+  status.textContent=message;
+  status.classList.toggle('connected',type==='connected');
+  status.classList.toggle('error',type==='error');
+}
+
+function parseFirebaseConfig(){
+  try{
+    const config=JSON.parse(firebaseConfigText);
+    if(!config.apiKey || !config.databaseURL || !config.projectId){
+      throw new Error('missing fields');
+    }
+    return config;
+  }catch(error){
+    setFirebaseStatus('Firebase設定JSONを確認してください。apiKey / databaseURL / projectId が必要です。','error');
+    return null;
+  }
+}
+
+function connectFirebaseSync(){
+  const config=parseFirebaseConfig();
+  const tournamentId=(firebaseTournamentId || '').trim();
+
+  if(!config || !tournamentId){
+    if(!tournamentId){
+      setFirebaseStatus('大会IDを入力してください。','error');
+    }
+    return;
+  }
+
+  if(!window.firebaseTournament){
+    setFirebaseStatus('Firebase SDKを読み込み中です。少し待ってからもう一度押してください。','error');
+    return;
+  }
+
+  saveFirebaseSettings();
+  setFirebaseStatus('Firebaseへ接続中です...','');
+  window.firebaseTournament.connect({
+    config:config,
+    tournamentId:tournamentId,
+    onRemoteState:applyFirebaseState,
+    onStatus:setFirebaseStatus
+  });
+}
+
+function pushFirebaseNow(){
+  if(isViewerMode()){
+    return;
+  }
+
+  const state=createPersistedState();
+  publishFirebaseState(state,true);
+}
+
+function publishFirebaseState(state,force){
+  if(firebaseApplyingRemote || isViewerMode()){
+    return;
+  }
+
+  if(!window.firebaseTournament || !firebaseConnected){
+    return;
+  }
+
+  lastFirebaseWriteStamp=state.updatedAt;
+  window.firebaseTournament.save(state,force);
+}
+
+function applyFirebaseState(state){
+  if(!state || state.updatedAt===lastFirebaseWriteStamp){
+    return;
+  }
+
+  firebaseApplyingRemote=true;
+  applyPersistedState(state);
+  firebaseApplyingRemote=false;
+  setFirebaseStatus('Firebase同期中: 最新状態を表示しています','connected');
+}
+
 function saveRuleInfo(){
   const storage=getStorage();
 
@@ -2426,6 +2766,9 @@ function saveRuleInfo(){
       },
       updatedAt:new Date().toISOString()
     }));
+    if(firebaseConnected && !isViewerMode()){
+      publishFirebaseState(createPersistedState(),false);
+    }
   }catch(error){
     // Saving can fail in private browser modes. The page still works without blocking.
   }
@@ -2523,6 +2866,10 @@ function renderRulesPage(){
 }
 
 function setCompetitionMode(mode){
+  if(isViewerMode()){
+    return;
+  }
+
   if(mode!=='league' && mode!=='tournament'){
     return;
   }
@@ -2725,6 +3072,10 @@ function addRuleItem(key,inputId){
 }
 
 function toggleRulesAdminMode(){
+  if(isViewerMode()){
+    return;
+  }
+
   rulesAdminMode=!rulesAdminMode;
   renderRulesPage();
 }
@@ -2845,6 +3196,10 @@ function openRulesPage(){
 
 // ===== Setup screen =====
 function goRegister(){
+  if(isViewerMode()){
+    return;
+  }
+
   const input=document.getElementById('count');
   const warning=document.getElementById('countWarn');
   const count=parseInt(input.value,10);
@@ -2909,6 +3264,10 @@ function updateRegisterStats(){
 }
 
 function shuffleNames(){
+  if(isViewerMode()){
+    return;
+  }
+
   names=shuffle(names);
   renderNames();
   saveState();
@@ -2916,6 +3275,10 @@ function shuffleNames(){
 
 // ===== Tournament creation =====
 function makeBracket(){
+  if(isViewerMode()){
+    return;
+  }
+
   names=names.map(function(name,index){
     return name.trim() || '参加者'+(index+1);
   });
@@ -3145,7 +3508,7 @@ function createSlot(match,slotIndex){
       status.textContent='敗退';
     }else if(hasBoth){
       slot.classList.add('ready');
-      status.textContent='勝利';
+      status.textContent=isViewerMode() ? '未決定' : '勝利';
     }else{
       slot.classList.add('advanced');
       status.textContent='進出待ち';
@@ -3153,7 +3516,7 @@ function createSlot(match,slotIndex){
     }
   }
 
-  if(player && hasBoth){
+  if(player && hasBoth && !isViewerMode()){
     slot.addEventListener('click',function(){
       selectWinner(match.roundIndex,match.matchIndex,slotIndex);
     });
@@ -3165,6 +3528,10 @@ function createSlot(match,slotIndex){
 }
 
 function selectWinner(roundIndex,matchIndex,slotIndex){
+  if(isViewerMode()){
+    return;
+  }
+
   const match=bracketRounds[roundIndex][matchIndex];
   const winner=match.players[slotIndex];
 
@@ -3380,7 +3747,9 @@ function toggleBroadcastPanel(){
 }
 
 function updateSaveStatus(){
-  const message=getStorage() ? '保存状態: 自動保存中' : '保存状態: この環境では保存不可';
+  const message=isViewerMode()
+    ? '閲覧者ページ: 保存しません'
+    : getStorage() ? '保存状態: 自動保存中' : '保存状態: この環境では保存不可';
   document.querySelectorAll('[data-save-status]').forEach(function(status){
     status.textContent=message;
   });
@@ -3396,6 +3765,10 @@ function getTimerMinutesInputValue(){
 }
 
 function updateTimerFromInput(){
+  if(isViewerMode()){
+    return;
+  }
+
   const minutes=getTimerMinutesInputValue();
   timerDurationSeconds=minutes*60;
   timerRemainingSeconds=timerDurationSeconds;
@@ -3408,6 +3781,10 @@ function updateTimerFromInput(){
 }
 
 function startTimer(){
+  if(isViewerMode()){
+    return;
+  }
+
   if(timerRemainingSeconds<=0){
     timerRemainingSeconds=timerDurationSeconds;
   }
@@ -3421,6 +3798,10 @@ function startTimer(){
 }
 
 function pauseTimer(){
+  if(isViewerMode()){
+    return;
+  }
+
   syncTimer();
   timerRunning=false;
   timerEndAt=null;
@@ -3430,6 +3811,10 @@ function pauseTimer(){
 }
 
 function resetTimer(){
+  if(isViewerMode()){
+    return;
+  }
+
   timerRunning=false;
   timerEndAt=null;
   timerRemainingSeconds=timerDurationSeconds;
@@ -3530,6 +3915,11 @@ function playTimerAlarm(){
 }
 
 function saveState(){
+  if(isViewerMode()){
+    updateSaveStatus();
+    return;
+  }
+
   const storage=getStorage();
   const state={
     countValue:parseInt(document.getElementById('count').value,10) || names.length || 8,
@@ -3609,6 +3999,10 @@ function loadSavedState(){
 }
 
 function clearSavedData(){
+  if(isViewerMode()){
+    return;
+  }
+
   const storage=getStorage();
   if(storage){
     storage.removeItem(STORAGE_KEY);
@@ -4127,6 +4521,10 @@ function getConfiguredLeagueMatchLimit(){
 }
 
 function makeBracket(){
+  if(isViewerMode()){
+    return;
+  }
+
   if(competitionMode==='tournament'){
     leagueRounds=[];
     return tournamentApi.makeBracket();
@@ -4610,12 +5008,19 @@ function createPlacementButton(match,player,place){
   button.textContent=place+'位';
   button.classList.toggle('active',placements[player]===place);
   button.addEventListener('click',function(){
+    if(isViewerMode()){
+      return;
+    }
     setLeaguePlacement(match.roundIndex,match.matchIndex,player,place);
   });
   return button;
 }
 
 function setLeaguePlacement(roundIndex,matchIndex,player,place){
+  if(isViewerMode()){
+    return;
+  }
+
   const match=leagueRounds[roundIndex][matchIndex];
   if(!match.placements){
     match.placements={};
@@ -4907,9 +5312,8 @@ function getBroadcastMatchInfo(){
   };
 }
 
-function saveState(){
-  const storage=getStorage();
-  const state={
+function createPersistedState(){
+  return {
     mode:competitionMode,
     countValue:parseInt(document.getElementById('count').value,10) || names.length || 8,
     names:names,
@@ -4925,9 +5329,90 @@ function saveState(){
     lastMatchInfo:lastMatchInfo,
     broadcastVisible:broadcastVisible,
     zoomViewMode:zoomViewMode,
+    ruleProfiles:ruleProfiles,
+    activeRuleMode:competitionMode,
     phase:getActivePhaseId(),
     updatedAt:new Date().toISOString()
   };
+}
+
+function applyPersistedState(state){
+  if(state.mode==='league' || state.mode==='fourPlayerPoints'){
+    competitionMode='league';
+  }else if(state.mode==='tournament'){
+    competitionMode='tournament';
+  }else if(Array.isArray(state.leagueRounds) && state.leagueRounds.length>0){
+    competitionMode='league';
+  }else{
+    competitionMode='tournament';
+  }
+
+  if(state.ruleProfiles){
+    ruleProfiles={
+      tournament:copyRuleInfo(state.ruleProfiles.tournament || tournamentDefaultRuleInfo),
+      league:copyRuleInfo(state.ruleProfiles.league || leagueDefaultRuleInfo)
+    };
+    applyEnjoyLeagueRules();
+  }
+
+  ruleInfo=ruleProfiles[competitionMode];
+  names=Array.isArray(state.names) ? state.names : [];
+  leagueRounds=Array.isArray(state.leagueRounds) ? state.leagueRounds : [];
+  bracketRounds=Array.isArray(state.bracketRounds) ? state.bracketRounds : [];
+  bracketSize=Number.isFinite(state.bracketSize) ? state.bracketSize : nextPowerOfTwo(Math.max(2,names.length));
+  leagueMatchLimit=state.leagueMatchLimit || '';
+  timerDurationSeconds=Number.isFinite(state.timerDurationSeconds) ? state.timerDurationSeconds : 70*60;
+  timerRemainingSeconds=Number.isFinite(state.timerRemainingSeconds) ? state.timerRemainingSeconds : timerDurationSeconds;
+  timerEndAt=Number.isFinite(state.timerEndAt) ? state.timerEndAt : null;
+  timerRunning=Boolean(state.timerRunning);
+  timerAlarmPlayed=Boolean(state.timerAlarmPlayed);
+  stopTimerInterval();
+  if(timerRunning && timerEndAt){
+    timerRemainingSeconds=Math.max(0,Math.ceil((timerEndAt-Date.now())/1000));
+    if(timerRemainingSeconds>0){
+      startTimerInterval();
+    }else{
+      timerRunning=false;
+      timerEndAt=null;
+    }
+  }
+
+  renderTimer();
+  lastMatchInfo=state.lastMatchInfo || null;
+  broadcastVisible=Boolean(state.broadcastVisible);
+  zoomViewMode=state.zoomViewMode==='bracket' || state.zoomViewMode==='overview' ? state.zoomViewMode : 'list';
+  document.getElementById('count').value=state.countValue || names.length || 8;
+  updateModeUI();
+  renderRulesPage();
+
+  if(names.length>0){
+    renderNames();
+    updateRegisterStats();
+  }
+
+  if((competitionMode==='league' && leagueRounds.length>0) ||
+    (competitionMode==='tournament' && bracketRounds.length>0)){
+    show('bracketPage');
+    renderBracket();
+  }else if(names.length>0 && state.phase==='register' && !isViewerMode()){
+    show('register');
+  }else if(isViewerMode()){
+    show('rulesPage');
+  }
+
+  updateBroadcastPanel();
+  setPageRole(pageRole,false);
+  updateSaveStatus();
+}
+
+function saveState(){
+  if(isViewerMode()){
+    updateSaveStatus();
+    return;
+  }
+
+  const storage=getStorage();
+  const state=createPersistedState();
 
   if(!storage){
     document.querySelectorAll('[data-save-status]').forEach(function(status){
@@ -4938,6 +5423,7 @@ function saveState(){
 
   try{
     storage.setItem(STORAGE_KEY,JSON.stringify(state));
+    publishFirebaseState(state,false);
     document.querySelectorAll('[data-save-status]').forEach(function(status){
       status.textContent='保存状態: 保存完了 '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
     });
@@ -4964,58 +5450,7 @@ function loadSavedState(){
 
   try{
     const state=JSON.parse(raw);
-    if(state.mode==='league' || state.mode==='fourPlayerPoints'){
-      competitionMode='league';
-    }else if(state.mode==='tournament'){
-      competitionMode='tournament';
-    }else if(Array.isArray(state.leagueRounds) && state.leagueRounds.length>0){
-      competitionMode='league';
-    }else{
-      competitionMode='tournament';
-    }
-
-    ruleInfo=ruleProfiles[competitionMode];
-    names=Array.isArray(state.names) ? state.names : [];
-    leagueRounds=Array.isArray(state.leagueRounds) ? state.leagueRounds : [];
-    bracketRounds=Array.isArray(state.bracketRounds) ? state.bracketRounds : [];
-    bracketSize=Number.isFinite(state.bracketSize) ? state.bracketSize : nextPowerOfTwo(Math.max(2,names.length));
-    leagueMatchLimit=state.leagueMatchLimit || '';
-    timerDurationSeconds=Number.isFinite(state.timerDurationSeconds) ? state.timerDurationSeconds : 70*60;
-    timerRemainingSeconds=Number.isFinite(state.timerRemainingSeconds) ? state.timerRemainingSeconds : timerDurationSeconds;
-    timerEndAt=Number.isFinite(state.timerEndAt) ? state.timerEndAt : null;
-    timerRunning=Boolean(state.timerRunning);
-    timerAlarmPlayed=Boolean(state.timerAlarmPlayed);
-    if(timerRunning && timerEndAt){
-      timerRemainingSeconds=Math.max(0,Math.ceil((timerEndAt-Date.now())/1000));
-      if(timerRemainingSeconds>0){
-        startTimerInterval();
-      }else{
-        timerRunning=false;
-        timerEndAt=null;
-      }
-    }
-    renderTimer();
-    lastMatchInfo=state.lastMatchInfo || null;
-    broadcastVisible=Boolean(state.broadcastVisible);
-    zoomViewMode=state.zoomViewMode==='bracket' || state.zoomViewMode==='overview' ? state.zoomViewMode : 'list';
-    document.getElementById('count').value=state.countValue || names.length || 8;
-    updateModeUI();
-
-    if(names.length>0){
-      renderNames();
-      updateRegisterStats();
-    }
-
-    if((competitionMode==='league' && leagueRounds.length>0) ||
-      (competitionMode==='tournament' && bracketRounds.length>0)){
-      show('bracketPage');
-      renderBracket();
-    }else if(names.length>0 && state.phase==='register'){
-      show('register');
-    }
-
-    updateBroadcastPanel();
-    updateSaveStatus();
+    applyPersistedState(state);
   }catch(error){
     storage.removeItem(STORAGE_KEY);
     updateSaveStatus();
@@ -5023,6 +5458,10 @@ function loadSavedState(){
 }
 
 function clearSavedData(){
+  if(isViewerMode()){
+    return;
+  }
+
   const storage=getStorage();
   if(storage){
     storage.removeItem(STORAGE_KEY);
@@ -5063,6 +5502,23 @@ function escapeHtml(value){
 // ===== Event bindings: all actions are bound from JavaScript =====
 document.getElementById('startBtn').addEventListener('click',goRegister);
 document.getElementById('openRulesBtn').addEventListener('click',openRulesPage);
+document.getElementById('adminPageBtn').addEventListener('click',function(){
+  setPageRole('admin',true);
+});
+document.getElementById('viewerPageBtn').addEventListener('click',function(){
+  setPageRole('viewer',true);
+});
+document.getElementById('firebaseTournamentId').addEventListener('input',function(event){
+  firebaseTournamentId=event.target.value.trim() || 'sumabura-main';
+  saveFirebaseSettings();
+  updateFirebaseInputs();
+});
+document.getElementById('firebaseConfigInput').addEventListener('input',function(event){
+  firebaseConfigText=event.target.value.trim();
+  saveFirebaseSettings();
+});
+document.getElementById('firebaseConnectBtn').addEventListener('click',connectFirebaseSync);
+document.getElementById('firebasePushBtn').addEventListener('click',pushFirebaseNow);
 document.getElementById('modeTournamentBtn').addEventListener('click',function(){
   setCompetitionMode('tournament');
 });
@@ -5184,12 +5640,75 @@ document.addEventListener('keydown',function(event){
 window.addEventListener('resize',function(){
   refreshBracketLayout();
 });
+initializeRoleFromUrl();
+loadFirebaseSettings();
 loadRuleInfo();
-saveRuleInfo();
+if(!isViewerMode()){
+  saveRuleInfo();
+}
 renderRulesPage();
 updateModeUI();
 renderTimer();
 loadSavedState();
+</script>
+<script type="module">
+import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js';
+
+let firebaseApp=null;
+let firebaseDatabase=null;
+let firebaseRef=null;
+let firebaseUnsubscribe=null;
+
+function safePath(value){
+  return String(value || 'sumabura-main').replace(/[.#$\[\]/]/g,'-').trim() || 'sumabura-main';
+}
+
+window.firebaseTournament={
+  connect:function(options){
+    try{
+      if(firebaseUnsubscribe){
+        firebaseUnsubscribe();
+        firebaseUnsubscribe=null;
+      }
+
+      firebaseApp=getApps().length ? getApps()[0] : initializeApp(options.config);
+      firebaseDatabase=getDatabase(firebaseApp);
+      firebaseRef=ref(firebaseDatabase,'tournaments/'+safePath(options.tournamentId));
+      firebaseUnsubscribe=onValue(firebaseRef,function(snapshot){
+        const value=snapshot.val();
+        if(value && value.state && typeof options.onRemoteState==='function'){
+          options.onRemoteState(value.state);
+        }
+      });
+
+      if(typeof options.onStatus==='function'){
+        options.onStatus('Firebase同期中: 大会ID '+safePath(options.tournamentId),'connected');
+      }
+    }catch(error){
+      if(typeof options.onStatus==='function'){
+        options.onStatus('Firebase接続エラー: '+error.message,'error');
+      }
+    }
+  },
+  save:function(state){
+    if(!firebaseRef){
+      return;
+    }
+
+    set(firebaseRef,{
+      state:state,
+      updatedAt:Date.now()
+    }).catch(function(error){
+      const status=document.getElementById('firebaseStatus');
+      if(status){
+        status.textContent='Firebase保存エラー: '+error.message;
+        status.classList.add('error');
+        status.classList.remove('connected');
+      }
+    });
+  }
+};
 </script>
 </body>
 </html>
