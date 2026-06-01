@@ -2368,23 +2368,7 @@ body.viewer-mode .ready{
     </nav>
   </header>
 
-  <section class="panel role-panel" aria-label="ページ切り替え">
-    <div class="role-switch">
-      <button id="adminPageBtn" type="button">管理者ページ</button>
-      <button id="viewerPageBtn" type="button">閲覧者ページ</button>
-    </div>
-    <div class="role-info">
-      <strong id="roleStatus">管理者ページ</strong>
-      <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center">
-        <input id="adminUrl" type="text" readonly aria-label="管理者ページURL" placeholder="管理者URL">
-        <button id="copyAdminUrlBtn" class="btn secondary" type="button" style="min-height:38px;padding:8px 12px;font-size:12px">コピー</button>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center">
-        <input id="viewerUrl" type="text" readonly aria-label="閲覧者ページURL" placeholder="閲覧者URL">
-        <button id="copyViewerUrlBtn" class="btn secondary" type="button" style="min-height:38px;padding:8px 12px;font-size:12px">コピー</button>
-      </div>
-    </div>
-  </section>
+
 
 
   <section id="timerPanel" class="panel timer-panel" aria-label="大会タイマー">
@@ -5756,40 +5740,7 @@ function escapeHtml(value){
 // ===== Event bindings: all actions are bound from JavaScript =====
 document.getElementById('startBtn').addEventListener('click',goRegister);
 document.getElementById('openRulesBtn').addEventListener('click',openRulesPage);
-document.getElementById('adminPageBtn').addEventListener('click',function(){
-  setPageRole('admin',true);
-});
-document.getElementById('viewerPageBtn').addEventListener('click',function(){
-  setPageRole('viewer',true);
-});
-document.getElementById('copyAdminUrlBtn').addEventListener('click',function(){
-  const input=document.getElementById('adminUrl');
-  if(input && input.value){
-    navigator.clipboard.writeText(input.value).then(function(){
-      const btn=document.getElementById('copyAdminUrlBtn');
-      const orig=btn.textContent;
-      btn.textContent='✓ コピー済み';
-      setTimeout(function(){btn.textContent=orig;},1800);
-    }).catch(function(){
-      input.select();
-      document.execCommand('copy');
-    });
-  }
-});
-document.getElementById('copyViewerUrlBtn').addEventListener('click',function(){
-  const input=document.getElementById('viewerUrl');
-  if(input && input.value){
-    navigator.clipboard.writeText(input.value).then(function(){
-      const btn=document.getElementById('copyViewerUrlBtn');
-      const orig=btn.textContent;
-      btn.textContent='✓ コピー済み';
-      setTimeout(function(){btn.textContent=orig;},1800);
-    }).catch(function(){
-      input.select();
-      document.execCommand('copy');
-    });
-  }
-});
+
 document.getElementById('modeTournamentBtn').addEventListener('click',function(){
   setCompetitionMode('tournament');
 });
@@ -5911,15 +5862,27 @@ document.addEventListener('keydown',function(event){
 window.addEventListener('resize',function(){
   refreshBracketLayout();
 });
-initializeRoleFromUrl();
-loadRuleInfo();
-if(!isViewerMode()){
-  saveRuleInfo();
-}
-renderRulesPage();
-updateModeUI();
-renderTimer();
-loadSavedState();
+try{
+  initializeRoleFromUrl();
+}catch(e){console.error('initializeRoleFromUrl failed:',e);}
+try{
+  loadRuleInfo();
+}catch(e){console.error('loadRuleInfo failed:',e);}
+try{
+  if(!isViewerMode()){saveRuleInfo();}
+}catch(e){console.error('saveRuleInfo failed:',e);}
+try{
+  renderRulesPage();
+}catch(e){console.error('renderRulesPage failed:',e);}
+try{
+  updateModeUI();
+}catch(e){console.error('updateModeUI failed:',e);}
+try{
+  renderTimer();
+}catch(e){console.error('renderTimer failed:',e);}
+try{
+  loadSavedState();
+}catch(e){console.error('loadSavedState failed:',e);}
 </script>
 
 <script>
