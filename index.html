@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="スマブラ大会の参加者登録、トーナメント表、4人ポイント戦、ルール確認、結果保存を1画面で進行できる大会運営ツールです。">
+<meta name="theme-color" content="#04040a">
 <title>スマブラ大会</title>
 <style>
 /* ===== Base theme: red, black, gold esports UI ===== */
@@ -3294,7 +3296,7 @@ body.light-mode .round-col h3{
 body.light-mode .sep{
   background:linear-gradient(90deg,transparent,rgba(100,70,200,.3),var(--gold),rgba(100,70,200,.3),transparent);
 }
-body.light-mode .main-panel,.body.light-mode .side-panel{
+body.light-mode .main-panel,body.light-mode .side-panel{
   border-top:1px solid rgba(100,70,200,.2);
   background:linear-gradient(145deg,rgba(245,242,255,.95),rgba(255,255,255,.98));
 }
@@ -3950,6 +3952,213 @@ body.light-mode .match-matrix thead th{
 .pr-rules-list li{padding:6px 10px;background:#f5f5f5;border-left:4px solid #111;font-size:13px;}
 .pr-footer{text-align:center;margin-top:32px;padding-top:14px;border-top:1px solid #ddd;font-size:12px;color:#aaa;}
 .pr-stats-row{font-size:14px;padding:8px 0;}
+
+/* ============================================================
+   USABILITY POLISH
+   ============================================================ */
+:focus-visible{
+  outline:3px solid rgba(255,224,130,.9);
+  outline-offset:3px;
+}
+
+button:disabled{
+  cursor:not-allowed;
+  opacity:.62;
+}
+
+.topbar{
+  align-items:flex-start;
+}
+
+.brand{
+  min-width:0;
+}
+
+.brand h1,
+.brand p{
+  overflow-wrap:anywhere;
+}
+
+.steps{
+  max-width:100%;
+}
+
+.step{
+  white-space:nowrap;
+}
+
+.timer-panel{
+  grid-template-columns:minmax(130px,.55fr) minmax(220px,1fr) minmax(220px,.8fr);
+}
+
+.timer-display{
+  min-width:0;
+  isolation:isolate;
+}
+
+.timer-display::before{
+  z-index:-1;
+}
+
+.rule-hero .main-panel{
+  min-width:0;
+}
+
+.rule-hero .side-panel{
+  min-width:0;
+}
+
+body.viewer-mode #backFromRulesBtn{
+  display:none;
+}
+
+body.viewer-mode .rule-hero .side-panel{
+  order:2;
+}
+
+body.viewer-mode .rule-hero .main-panel{
+  order:1;
+}
+
+@media(max-width:820px){
+  .topbar{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+
+  .brand{
+    align-items:flex-start;
+  }
+
+  .brand p{
+    max-width:32em;
+  }
+
+  #themeToggleBtn,
+  .role-badge{
+    justify-self:start;
+  }
+
+  .steps{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    width:100%;
+  }
+
+  .step{
+    display:grid;
+    place-items:center;
+    min-width:0;
+    padding:8px 6px;
+    text-align:center;
+  }
+
+  .timer-panel{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+
+  .timer-display{
+    min-height:74px;
+    font-size:clamp(38px,13vw,64px);
+    letter-spacing:.08em;
+  }
+
+  .rule-hero{
+    grid-template-columns:1fr;
+  }
+
+  .rule-hero .side-panel{
+    order:2;
+  }
+
+  .rule-hero .main-panel{
+    order:1;
+  }
+}
+
+@media(max-width:560px){
+  .page{
+    padding-top:18px;
+  }
+
+  .brand{
+    gap:10px;
+  }
+
+  .brand h1{
+    font-size:clamp(28px,9vw,38px);
+    line-height:1.05;
+  }
+
+  .brand p{
+    font-size:13px;
+    line-height:1.5;
+  }
+
+  .logo{
+    width:44px;
+    height:44px;
+    flex:0 0 auto;
+  }
+
+  .timer-panel{
+    padding:14px;
+  }
+
+  .timer-title{
+    grid-template-columns:1fr auto;
+    align-items:end;
+  }
+
+  .timer-title span{
+    text-align:right;
+  }
+
+  .timer-display{
+    min-height:68px;
+    padding:10px 12px;
+  }
+
+  .page-clock{
+    text-align:left;
+  }
+
+  .header{
+    gap:10px;
+  }
+
+  .header h2{
+    line-height:1.2;
+  }
+
+  .rule-title{
+    font-size:clamp(32px,10vw,46px);
+  }
+}
+
+@media(max-width:380px){
+  .steps{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .timer-display{
+    font-size:clamp(44px,17vw,62px)!important;
+    letter-spacing:.05em;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,
+  *::before,
+  *::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    scroll-behavior:auto!important;
+    transition-duration:.01ms!important;
+  }
+}
 </style>
 </head>
 
@@ -3993,7 +4202,7 @@ body.light-mode .match-matrix thead th{
       <span id="roleBadgeText">管理者モード</span>
     </div>
     <nav class="steps" aria-label="進行状況">
-      <span class="step active" data-step="setup">1 参加人数</span>
+      <span class="step active" data-step="setup" aria-current="step">1 参加人数</span>
       <span class="step" data-step="register">2 参加者</span>
       <span class="step" data-step="bracketPage">3 試合</span>
       <span class="step" data-step="rulesPage">ルール</span>
@@ -4008,7 +4217,7 @@ body.light-mode .match-matrix thead th{
       <h2>大会タイマー</h2>
       <span>大会時間の目安</span>
     </div>
-    <div id="timerDisplay" class="timer-display">70:00</div>
+    <div id="timerDisplay" class="timer-display" aria-live="polite">70:00</div>
     <div class="timer-controls">
       <div class="timer-input admin-only">
         <label for="timerMinutes">時間設定</label>
@@ -5160,7 +5369,13 @@ function show(id){
   target.classList.add('active');
 
   document.querySelectorAll('.step').forEach(function(step){
-    step.classList.toggle('active',step.dataset.step===id);
+    const isActive=step.dataset.step===id;
+    step.classList.toggle('active',isActive);
+    if(isActive){
+      step.setAttribute('aria-current','step');
+    }else{
+      step.removeAttribute('aria-current');
+    }
   });
 
   try{
