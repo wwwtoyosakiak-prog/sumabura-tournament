@@ -4265,7 +4265,7 @@ body.viewer-mode .rule-hero .main-panel{
     <div class="header">
       <button id="backFromRulesBtn" class="back" type="button">← スタートへ</button>
       <h2>ルール・大会情報</h2>
-      <button id="adminModeBtn" class="back admin-only" type="button">管理モード ON</button>
+      <button id="adminModeBtn" class="back admin-only" type="button" aria-expanded="false" aria-controls="rulesAdminPanel">ルール編集を開く</button>
     </div>
 
     <div class="rule-hero">
@@ -4279,7 +4279,7 @@ body.viewer-mode .rule-hero .main-panel{
         </div>
         <div class="stats">
           <div class="stat"><span>大会形式</span><strong id="ruleFormatView">4人マッチポイント制</strong></div>
-          <div class="stat"><span>管理モード</span><strong id="ruleAdminStatus">OFF</strong></div>
+          <div class="stat"><span>ルール編集</span><strong id="ruleAdminStatus">閉じています</strong></div>
         </div>
       </main>
 
@@ -4861,8 +4861,7 @@ function isViewerMode(){
 
 function enableAdminAction(){
   if(pageRole==='viewer'){
-    pageRole='admin';
-    document.body.classList.remove('viewer-mode');
+    setPageRole('admin',true);
   }
 }
 
@@ -5064,13 +5063,14 @@ function renderRulesPage(){
   setText('ruleDateView',ruleInfo.eventDate);
   setText('ruleVenueView',ruleInfo.venue);
   setText('ruleEquipmentView',ruleInfo.equipment);
-  setText('ruleAdminStatus',rulesAdminMode ? 'ON' : 'OFF');
+  setText('ruleAdminStatus',rulesAdminMode ? '編集中' : '閉じています');
 
   const adminButton=document.getElementById('adminModeBtn');
   const adminPanel=document.getElementById('rulesAdminPanel');
 
   if(adminButton){
-    adminButton.textContent=rulesAdminMode ? '管理モード OFF' : '管理モード ON';
+    adminButton.textContent=rulesAdminMode ? 'ルール編集を閉じる' : 'ルール編集を開く';
+    adminButton.setAttribute('aria-expanded',String(rulesAdminMode));
   }
 
   if(adminPanel){
@@ -5351,6 +5351,17 @@ function toggleRulesAdminMode(){
 
   rulesAdminMode=!rulesAdminMode;
   renderRulesPage();
+
+  if(rulesAdminMode){
+    const adminPanel=document.getElementById('rulesAdminPanel');
+    if(adminPanel){
+      try{
+        adminPanel.scrollIntoView({behavior:'smooth',block:'start'});
+      }catch(error){
+        adminPanel.scrollIntoView();
+      }
+    }
+  }
 }
 
 function show(id){
