@@ -4938,6 +4938,7 @@ function saveRuleInfo(){
   const storage=getStorage();
 
   if(!storage){
+    updateRuleSaveStatus(false);
     return;
   }
 
@@ -4952,9 +4953,20 @@ function saveRuleInfo(){
       },
       updatedAt:new Date().toISOString()
     }));
+    updateRuleSaveStatus(true);
   }catch(error){
     // Saving can fail in private browser modes. The page still works without blocking.
+    updateRuleSaveStatus(false);
   }
+}
+
+function updateRuleSaveStatus(saved){
+  const message=saved
+    ? '保存状態: ルール保存完了 '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})
+    : '保存状態: ルールを保存できません';
+  document.querySelectorAll('[data-save-status]').forEach(function(status){
+    status.textContent=message;
+  });
 }
 
 function loadRuleInfo(){
@@ -5081,6 +5093,15 @@ function renderRulesPage(){
   renderRuleList('bansListView',ruleInfo.bans);
   renderRuleList('notesListView',ruleInfo.notes);
   renderRuleEditor();
+}
+
+function renderRuleSummary(){
+  setText('ruleTournamentName',ruleInfo.tournamentName);
+  setText('ruleGameName',ruleInfo.gameName);
+  setText('ruleFormatView',ruleInfo.format);
+  setText('ruleDateView',ruleInfo.eventDate);
+  setText('ruleVenueView',ruleInfo.venue);
+  setText('ruleEquipmentView',ruleInfo.equipment);
 }
 
 function setCompetitionMode(mode){
@@ -5303,10 +5324,16 @@ function renderEditableRuleList(containerId,key,items){
     row.className='edit-row';
     input.type='text';
     input.value=text;
+    input.addEventListener('input',function(){
+      ruleInfo[key][index]=input.value.trim();
+      saveRuleInfo();
+      renderRuleListPreview(key);
+    });
     input.addEventListener('change',function(){
       ruleInfo[key][index]=input.value.trim();
       saveRuleInfo();
-      });
+      renderRuleListPreview(key);
+    });
 
     button.type='button';
     button.className='delete-rule';
@@ -5314,6 +5341,7 @@ function renderEditableRuleList(containerId,key,items){
     button.addEventListener('click',function(){
       ruleInfo[key].splice(index,1);
       saveRuleInfo();
+      renderRuleListPreview(key);
       var c=document.getElementById(containerId);
       if(c){renderEditableRuleList(containerId,key,ruleInfo[key]);}
     });
@@ -5327,7 +5355,12 @@ function renderEditableRuleList(containerId,key,items){
 function updateRuleField(key,value){
   ruleInfo[key]=value.trim() || '未設定';
   saveRuleInfo();
-  renderRulesPage();
+  renderRuleSummary();
+}
+
+function renderRuleListPreview(key){
+  const listId=key==='rules' ? 'rulesListView' : key==='bans' ? 'bansListView' : 'notesListView';
+  renderRuleList(listId,ruleInfo[key]);
 }
 
 function addRuleItem(key,inputId){
@@ -5341,6 +5374,7 @@ function addRuleItem(key,inputId){
   ruleInfo[key].push(value);
   input.value='';
   saveRuleInfo();
+  renderRuleListPreview(key);
   renderRulesPage();
 }
 
@@ -9774,22 +9808,22 @@ document.querySelectorAll('.rule-tab').forEach(function(button){
     switchRuleTab(button.dataset.ruleTab);
   });
 });
-document.getElementById('ruleGameInput').addEventListener('change',function(event){
+document.getElementById('ruleGameInput').addEventListener('input',function(event){
   updateRuleField('gameName',event.target.value);
 });
-document.getElementById('ruleTournamentInput').addEventListener('change',function(event){
+document.getElementById('ruleTournamentInput').addEventListener('input',function(event){
   updateRuleField('tournamentName',event.target.value);
 });
-document.getElementById('ruleDateInput').addEventListener('change',function(event){
+document.getElementById('ruleDateInput').addEventListener('input',function(event){
   updateRuleField('eventDate',event.target.value);
 });
-document.getElementById('ruleVenueInput').addEventListener('change',function(event){
+document.getElementById('ruleVenueInput').addEventListener('input',function(event){
   updateRuleField('venue',event.target.value);
 });
-document.getElementById('ruleEquipmentInput').addEventListener('change',function(event){
+document.getElementById('ruleEquipmentInput').addEventListener('input',function(event){
   updateRuleField('equipment',event.target.value);
 });
-document.getElementById('ruleFormatInput').addEventListener('change',function(event){
+document.getElementById('ruleFormatInput').addEventListener('input',function(event){
   updateRuleField('format',event.target.value);
 });
 document.getElementById('rulesAddBtn').addEventListener('click',function(){
