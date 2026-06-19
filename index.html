@@ -8908,7 +8908,7 @@ function createLeagueSchedule(players,matchLimit){
 
 function createSplitGroupSchedule(players,matchLimit){
   if(getLeagueMatchSize()===8){
-    return createDynamicEightPlayerGroupSchedule(players);
+    return createDynamicEightPlayerGroupSchedule(players,matchLimit);
   }
 
   const groups=createLeagueGroups(players);
@@ -8947,9 +8947,17 @@ function createSplitGroupSchedule(players,matchLimit){
   return matchLimit ? trimLeagueRounds(combined,matchLimit) : combined;
 }
 
-function createDynamicEightPlayerGroupSchedule(players){
+function createDynamicEightPlayerGroupSchedule(players,matchLimit){
   const groups=createLeagueGroups(players);
-  return [createDynamicGroupRound(groups,0)];
+  const firstRound=createDynamicGroupRound(groups,0);
+
+  if(matchLimit){
+    return [firstRound.slice(0,matchLimit)].filter(function(round){
+      return round.length>0;
+    });
+  }
+
+  return [firstRound];
 }
 
 function createDynamicGroupRound(groups,roundIndex){
@@ -9319,13 +9327,15 @@ renderBracket=function(){
 function createLeagueSummary(standings,totalMatches,completedMatches){
   const section=document.createElement('section');
   const leader=standings[0];
-  const remaining=Math.max(0,totalMatches-completedMatches);
+  const plannedMatches=getLeaguePlannedMatchCount(totalMatches);
+  const remaining=Math.max(0,plannedMatches-completedMatches);
   const coverage=getPairCoverage();
   const items=[
     ['参加者',names.length+'名'],
     ['グループ',hasSplitGroupMatches() ? 'A / B' : 'なし'],
-    ['総試合数',totalMatches+'試合'],
-    ['消化試合',completedMatches+' / '+totalMatches],
+    ['総試合数',plannedMatches+'試合'],
+    ['作成済み',totalMatches+'試合'],
+    ['消化試合',completedMatches+' / '+plannedMatches],
     ['対戦ペア',coverage.covered+' / '+coverage.total],
     ['現在1位',leader ? leader.name+' '+leader.points+'pt' : '-']
   ];
@@ -9344,6 +9354,14 @@ function createLeagueSummary(standings,totalMatches,completedMatches){
   });
 
   return section;
+}
+
+function getLeaguePlannedMatchCount(actualMatches){
+  const configured=getConfiguredLeagueMatchLimit();
+  if(configured){
+    return Math.max(configured,actualMatches);
+  }
+  return actualMatches;
 }
 
 function getPairCoverage(){
@@ -9652,14 +9670,33 @@ function addLeagueMatchManually(){
     return;
   }
 
+  const beforeCount=getActualLeagueMatchCount();
+
   if(isDynamicEightGroupMode()){
     addDynamicEightGroupRound();
   }else{
     addSingleLeagueRound();
   }
 
+  syncLeagueMatchLimitAfterManualAdd(beforeCount);
   renderBracket();
   saveState();
+}
+
+function syncLeagueMatchLimitAfterManualAdd(beforeCount){
+  const actualCount=getActualLeagueMatchCount();
+  if(actualCount<=beforeCount){
+    return;
+  }
+
+  const configured=getConfiguredLeagueMatchLimit();
+  if(!configured || actualCount>configured){
+    leagueMatchLimit=String(actualCount);
+    const input=document.getElementById('leagueMatchLimit');
+    if(input){
+      input.value=leagueMatchLimit;
+    }
+  }
 }
 
 function addDynamicEightGroupRound(){
