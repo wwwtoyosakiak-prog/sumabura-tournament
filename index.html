@@ -4370,7 +4370,7 @@ body.viewer-mode .rule-hero .main-panel{
           </div>
           <div class="rule-flow-item">
             <div class="rule-flow-num">3</div>
-            <div class="rule-flow-text"><span>ポイント</span>大会順位はポイント制です。<strong style="color:var(--gold-2)">1位10p / 2位8p / 3位5p / 4位3p</strong>を加算します。</div>
+            <div class="rule-flow-text"><span>ポイント</span>大会順位はポイント制です。4人版は<strong style="color:var(--gold-2)">1位10p / 2位8p / 3位5p / 4位3p</strong>、8人版は<strong style="color:var(--gold-2)">1位10p / 2位8p / 3位6p / 4〜6位4p / 7位2p / 8位1p</strong>を加算します。</div>
           </div>
           <div class="rule-flow-item">
             <div class="rule-flow-num">4</div>
@@ -4460,6 +4460,7 @@ body.viewer-mode .rule-hero .main-panel{
             <option value="シングルエリミネーション">シングルエリミネーション</option>
             <option value="ダブルエリミネーション">ダブルエリミネーション</option>
             <option value="4人マッチポイント制">4人マッチポイント制</option>
+            <option value="8人マッチポイント制">8人マッチポイント制</option>
             <option value="スイスドロー">スイスドロー</option>
           </select>
         </div>
@@ -4527,6 +4528,11 @@ body.viewer-mode .rule-hero .main-panel{
           <button id="registerDoubleElimBtn" type="button">ダブル</button>
         </div>
         <div id="leagueSettings" class="league-settings admin-only">
+          <label class="label" for="leagueMatchSize">1マッチ人数</label>
+          <select id="leagueMatchSize">
+            <option value="4">4人ポイント</option>
+            <option value="8">8人ポイント</option>
+          </select>
           <label class="label" for="leagueMatchLimit">合計試合数</label>
           <input id="leagueMatchLimit" type="number" min="1" max="999" inputmode="numeric" placeholder="合計試合数を入力してください">
           <label class="group-split-control" for="splitGroupsToggle">
@@ -4746,6 +4752,7 @@ let competitionMode='tournament';
 let eliminationMode='single';
 let leagueMatchLimit='';
 let splitGroupsEnabled=false;
+let leagueMatchSize=4;
 let pageRole='admin';
 let timerDurationSeconds=70*60;
 let timerRemainingSeconds=70*60;
@@ -4799,6 +4806,7 @@ const leagueDefaultRuleInfo={
     'アイテムあり（すべて）',
     '大会順位はポイント制',
     '1位10p / 2位8p / 3位5p / 4位3p',
+    '8人版: 1位10p / 2位8p / 3位6p / 4位4p / 5位4p / 6位4p / 7位2p / 8位1p',
     '70分程度を目安に大会を進行',
     '時間終了時の総獲得ポイントが多い人が優勝'
   ],
@@ -5063,6 +5071,7 @@ function applyEnjoyLeagueRules(){
     'アイテムあり（すべて）',
     '大会順位はポイント制',
     '1位10p / 2位8p / 3位5p / 4位3p',
+    '8人版: 1位10p / 2位8p / 3位6p / 4位4p / 5位4p / 6位4p / 7位2p / 8位1p',
     '70分程度を目安に大会を進行',
     '時間終了時の総獲得ポイントが多い人が優勝'
   ];
@@ -5071,7 +5080,7 @@ function applyEnjoyLeagueRules(){
   ruleProfiles.league.tournamentName='エンジョイ大乱闘';
   ruleProfiles.league.format='4人マッチポイント制';
   ruleProfiles.league.rules=ruleProfiles.league.rules.filter(function(rule){
-    return !/^1位(4点|10p)|^1位4点|^1位10p|^タイム制 6分$|^乱闘$/.test(rule);
+    return !/^1位(4点|10p)|^1位4点|^1位10p|^8人版:|^タイム制 6分$|^乱闘$/.test(rule);
   });
 
   enjoyRules.forEach(function(rule){
@@ -5237,24 +5246,26 @@ function updateModeUI(){
   const setupEliminationSettings=document.getElementById('setupEliminationSettings');
   const registerEliminationSettings=document.getElementById('registerEliminationSettings');
   const leagueMatchLimitInput=document.getElementById('leagueMatchLimit');
+  const leagueMatchSizeInput=document.getElementById('leagueMatchSize');
   const splitGroupsToggle=document.getElementById('splitGroupsToggle');
+  const matchSize=getLeagueMatchSize();
 
   updateModeButtons();
 
   if(eyebrow){
-    eyebrow.textContent=isLeague ? '4 PLAYER POINTS' : (isDouble ? 'DOUBLE ELIMINATION' : 'SINGLE ELIMINATION');
+    eyebrow.textContent=isLeague ? matchSize+' PLAYER POINTS' : (isDouble ? 'DOUBLE ELIMINATION' : 'SINGLE ELIMINATION');
   }
 
   if(lead){
     lead.textContent=isLeague
-      ? '参加人数を入力してエンジョイ大乱闘を開始してください。4人1組のタイム制乱闘をポイントで順位化します。'
+      ? '参加人数を入力してエンジョイ大乱闘を開始してください。'+matchSize+'人1組のタイム制乱闘をポイントで順位化します。'
       : (isDouble
         ? '参加人数を入力して大会を開始してください。1回負けても敗者側から復活できる形式です。'
         : '参加人数を入力して大会を開始してください。勝ち上がり式のトーナメント表を作成します。');
   }
 
   if(makeButton){
-    makeButton.textContent=isLeague ? '4人マッチ表作成' : (isDouble ? 'ダブルトーナメント作成' : 'トーナメント作成');
+    makeButton.textContent=isLeague ? matchSize+'人マッチ表作成' : (isDouble ? 'ダブルトーナメント作成' : 'トーナメント作成');
   }
 
   if(statLabel){
@@ -5277,6 +5288,10 @@ function updateModeUI(){
     leagueMatchLimitInput.value=leagueMatchLimit || '';
   }
 
+  if(leagueMatchSizeInput && leagueMatchSizeInput.value!==String(matchSize)){
+    leagueMatchSizeInput.value=String(matchSize);
+  }
+
   if(splitGroupsToggle){
     splitGroupsToggle.checked=splitGroupsEnabled;
   }
@@ -5284,8 +5299,8 @@ function updateModeUI(){
   if(formatNote){
     formatNote.textContent=isLeague
       ? (splitGroupsEnabled
-        ? 'エンジョイ大乱闘用です。参加者をA/Bの2グループに分け、同じグループ内で対戦カードを作ります。'
-        : 'エンジョイ大乱闘用です。合計試合数を入力してください。タイム制6分、ギミックあり、アイテムあり、順位ポイントは10/8/5/3です。')
+        ? 'エンジョイ大乱闘用です。参加者をA/Bの2グループに分け、同じグループ内で'+matchSize+'人マッチを作ります。'
+        : 'エンジョイ大乱闘用です。合計試合数を入力してください。'+matchSize+'人マッチ、順位ポイントは'+getLeaguePointLabel(matchSize)+'です。')
       : (isDouble
         ? 'ダブルエリミネーション用です。1回負けると敗者側へ移動し、2回負けると敗退です。'
         : '2,4,8,16,32人は通常トーナメント、それ以外は次の2の累乗枠にして不戦勝を自動割り当てします。');
@@ -5732,7 +5747,7 @@ function renderNames(){
 }
 
 function getRegistrationGroupSuffix(index){
-  if(competitionMode!=='league' || !splitGroupsEnabled || names.length<4){
+  if(competitionMode!=='league' || !splitGroupsEnabled || names.length<getLeagueMatchSize()){
     return '';
   }
 
@@ -7094,6 +7109,25 @@ function closePrintPreview(){
   document.body.style.overflow='';
 }
 
+function createPrintPlacementHeaders(){
+  return getLeaguePointTable(getLeagueMatchSize()).map(function(_,index){
+    return '<th>'+(index+1)+'位</th>';
+  }).join('');
+}
+
+function createPrintPlacementCells(row){
+  return getLeaguePointTable(getLeagueMatchSize()).map(function(_,index){
+    return '<td>'+(row.places[index+1] || 0)+'</td>';
+  }).join('');
+}
+
+function createPrintPointBoxes(){
+  return getLeaguePointTable(getLeagueMatchSize()).map(function(point,index){
+    var cls=index===0 ? ' gold' : index===1 ? ' silver' : index===2 ? ' bronze' : '';
+    return '<div class="pr-pt-box'+cls+'"><div class="pr-pt-place">'+(index+1)+'位</div><div class="pr-pt-val">'+point+'pt</div></div>';
+  }).join('');
+}
+
 function printResults(){
   var tName  = ruleInfo.tournamentName || 'スマブラ大会';
   var gName  = ruleInfo.gameName       || '大乱闘スマッシュブラザーズ SPECIAL';
@@ -7117,10 +7151,10 @@ function printResults(){
     standings.forEach(function(p,i){
       var medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
       var cls   = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'';
-      rows += '<tr class="'+cls+'">'        +'<td class="rank-cell">'+medal+(i+1)+'位</td>'        +'<td class="name-cell">'+escapeHtml(p.name)+'</td>'        +'<td class="pts-cell">'+p.points+'pt</td>'        +'<td>'+p.played+'</td>'        +'<td style="color:#b8860b;font-weight:900">'+p.first+'</td>'        +'<td style="color:#666;font-weight:900">'+p.second+'</td>'        +'<td style="color:#8b4513;font-weight:900">'+p.third+'</td>'        +'<td>'+p.fourth+'</td>'        +'</tr>';
+      rows += '<tr class="'+cls+'">'        +'<td class="rank-cell">'+medal+(i+1)+'位</td>'        +'<td class="name-cell">'+escapeHtml(p.name)+'</td>'        +'<td class="pts-cell">'+p.points+'pt</td>'        +'<td>'+p.played+'</td>'        +createPrintPlacementCells(p)        +'</tr>';
     });
-    bodyHtml += '<div class="pr-sec">'      +'<h2>最終順位</h2>'      +'<p class="pr-meta-note">完了試合: '+completed+' / '+total+'試合</p>'      +'<table class="pr-table"><thead><tr>'      +'<th>順位</th><th>プレイヤー</th><th>ポイント</th><th>試合数</th><th>1位</th><th>2位</th><th>3位</th><th>4位</th>'      +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
-    bodyHtml += '<div class="pr-sec">'      +'<h2>ポイント配分</h2>'      +'<div class="pr-pt-grid">'      +'<div class="pr-pt-box gold"><div class="pr-pt-place">1位</div><div class="pr-pt-val">10pt</div></div>'      +'<div class="pr-pt-box silver"><div class="pr-pt-place">2位</div><div class="pr-pt-val">8pt</div></div>'      +'<div class="pr-pt-box bronze"><div class="pr-pt-place">3位</div><div class="pr-pt-val">5pt</div></div>'      +'<div class="pr-pt-box"><div class="pr-pt-place">4位</div><div class="pr-pt-val">3pt</div></div>'      +'</div></div>';
+    bodyHtml += '<div class="pr-sec">'      +'<h2>最終順位</h2>'      +'<p class="pr-meta-note">完了試合: '+completed+' / '+total+'試合</p>'      +'<table class="pr-table"><thead><tr>'      +'<th>順位</th><th>プレイヤー</th><th>ポイント</th><th>試合数</th>'+createPrintPlacementHeaders()      +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+    bodyHtml += '<div class="pr-sec">'      +'<h2>ポイント配分</h2>'      +'<div class="pr-pt-grid">'+createPrintPointBoxes()+'</div></div>';
   }else{
     var champion = getChampionWinner();
     if(champion){
@@ -7678,7 +7712,7 @@ function buildPlayerStats(){
           stats[p].matches++;
           if(place){
             stats[p].placements.push(place);
-            stats[p].points+=getPlacementPoints(place);
+            stats[p].points+=getPlacementPoints(place,match.pointMode || match.players.length);
             if(place===1){stats[p].wins++;}
           }
         });
@@ -8055,7 +8089,7 @@ function buildLeagueModalContent(match){
     nameEl.textContent=player;
     var placeLabel=document.createElement('div');
     placeLabel.className='modal-league-placement-label';
-    placeLabel.textContent=place?place+'位 / '+getPlacementPoints(place)+'pt':'未入力';
+    placeLabel.textContent=place?place+'位 / '+getPlacementPoints(place,match.pointMode || match.players.length)+'pt':'未入力';
     top.appendChild(nameEl);
     top.appendChild(placeLabel);
 
@@ -8731,6 +8765,23 @@ function getConfiguredLeagueMatchLimit(){
   return Math.min(999,value);
 }
 
+function getLeagueMatchSize(){
+  return leagueMatchSize===8 ? 8 : 4;
+}
+
+function getLeaguePointTable(matchSize){
+  return matchSize===8
+    ? [10,8,6,4,4,4,2,1]
+    : [10,8,5,3];
+}
+
+function getLeaguePointLabel(matchSize){
+  const points=getLeaguePointTable(matchSize);
+  return points.map(function(point,index){
+    return (index+1)+'位'+point+'p';
+  }).join(' / ');
+}
+
 function isTournamentCreateSelected(){
   const makeButton=document.getElementById('makeBracketBtn');
   const registerTournamentButton=document.getElementById('registerModeTournamentBtn');
@@ -8804,6 +8855,7 @@ function createSplitGroupSchedule(players,matchLimit){
           roundIndex:roundIndex,
           matchIndex:matches.length,
           id:'r'+roundIndex+'m'+matches.length,
+          pointMode:match.pointMode || getLeagueMatchSize(),
           placements:match.placements || {}
         }));
       });
@@ -8886,6 +8938,7 @@ function validateLeagueMatchLimit(){
 }
 
 function createRoundRobinSchedule(players,matchLimit){
+  const matchSize=getLeagueMatchSize();
   const entries=players.map(function(player,index){
     return {name:player,seed:index};
   });
@@ -8894,10 +8947,10 @@ function createRoundRobinSchedule(players,matchLimit){
   const pairCounts={};
   const playCounts={};
   const desiredTotal=Number.isFinite(matchLimit) && matchLimit>0 ? Math.floor(matchLimit) : null;
-  const minRounds=Math.max(1,Math.ceil((entries.length-1)/3));
+  const minRounds=Math.max(1,Math.ceil((entries.length-1)/Math.max(1,matchSize-1)));
   const maxRounds=desiredTotal ? Math.max(minRounds,desiredTotal) : Math.max(minRounds,entries.length*3);
-  const matchesPerRound=entries.length<4 ? 1 : Math.max(1,Math.floor(entries.length/4));
-  const targetGroupSize=entries.length<4 ? entries.length : 4;
+  const matchesPerRound=entries.length<matchSize ? 1 : Math.max(1,Math.floor(entries.length/matchSize));
+  const targetGroupSize=entries.length<matchSize ? entries.length : matchSize;
 
   entries.forEach(function(entry){
     playCounts[entry.name]=0;
@@ -8943,6 +8996,7 @@ function createRoundRobinSchedule(players,matchLimit){
           id:'r'+roundIndex+'m'+matches.length,
           roundIndex:roundIndex,
           matchIndex:matches.length,
+          pointMode:matchSize,
           players:matchPlayers,
           placements:{}
         });
@@ -9030,6 +9084,7 @@ function ensureAllPairsCovered(entries,rounds,pairCounts,playCounts){
       id:'r'+roundIndex+'m0',
       roundIndex:roundIndex,
       matchIndex:0,
+      pointMode:getLeagueMatchSize(),
       players:matchPlayers,
       placements:{}
     };
@@ -9058,7 +9113,8 @@ function getFirstUncoveredPair(entries,pairCounts){
 }
 
 function createSupplementalGroup(entries,pair,pairCounts,playCounts){
-  const targetSize=entries.length<4 ? entries.length : 4;
+  const matchSize=getLeagueMatchSize();
+  const targetSize=entries.length<matchSize ? entries.length : matchSize;
   const group=[pair[0],pair[1]];
   const candidates=entries.filter(function(entry){
     return entry.name!==pair[0].name && entry.name!==pair[1].name;
@@ -9121,13 +9177,13 @@ renderBracket=function(){
     svg.setAttribute('height','0');
   }
 
-  document.getElementById('roundTitle').textContent='4人マッチ ポイント表';
+  document.getElementById('roundTitle').textContent=getLeagueMatchSize()+'人マッチ ポイント表';
   document.getElementById('roundBadge').textContent=names.length+'名 / '+totalMatches+'試合'+(hasSplitGroupMatches() ? ' / 2グループ' : '');
   document.getElementById('statRound').textContent=leagueRounds.length;
   document.getElementById('statRemain').textContent=Math.max(0,totalMatches-completedMatches);
   document.getElementById('roundNote').textContent=hasSplitGroupMatches()
     ? '参加者をA/Bの2グループに分け、同じグループ内だけで対戦カードを作成しています。'
-    : '設定した合計試合数で4人マッチを作成しています。各マッチで1位から4位を入力してください。';
+    : '設定した合計試合数で'+getLeagueMatchSize()+'人マッチを作成しています。各マッチで順位を入力してください。';
   document.getElementById('zoomBracketBtn').style.display='none';
   document.querySelector('.zoom-view-toggle').style.display='none';
 
@@ -9247,12 +9303,10 @@ function createStandingsSection(standings){
 
   section.className='league-section';
   title.className='league-section-title';
-  title.innerHTML='<h3>順位表</h3><span class="badge">1位10 / 2位8 / 3位5 / 4位3</span>';
+  title.innerHTML='<h3>順位表</h3><span class="badge">'+escapeHtml(getLeaguePointLabel(getLeagueMatchSize()))+'</span>';
   scroll.className='table-scroll';
   table.className='standings-table';
-  thead.innerHTML=hasSplitGroupMatches()
-    ? '<tr><th>順位</th><th>グループ</th><th>参加者</th><th>Pt</th><th>試合</th><th>1位</th><th>2位</th><th>3位</th><th>4位</th></tr>'
-    : '<tr><th>順位</th><th>参加者</th><th>Pt</th><th>試合</th><th>1位</th><th>2位</th><th>3位</th><th>4位</th></tr>';
+  thead.innerHTML=createStandingsHeaderHtml();
 
   standings.forEach(function(row,index){
     const tr=document.createElement('tr');
@@ -9263,10 +9317,7 @@ function createStandingsSection(standings){
       '<td><span class="player-cell" style="--player-color:'+getPlayerColor(row.name)+'">'+escapeHtml(row.name)+'</span></td>'+
       '<td>'+row.points+'</td>'+
       '<td>'+row.played+'</td>'+
-      '<td>'+row.first+'</td>'+
-      '<td>'+row.second+'</td>'+
-      '<td>'+row.third+'</td>'+
-      '<td>'+row.fourth+'</td>';
+      createPlacementStatsCells(row);
     tbody.appendChild(tr);
   });
 
@@ -9276,6 +9327,20 @@ function createStandingsSection(standings){
   section.appendChild(title);
   section.appendChild(scroll);
   return section;
+}
+
+function createStandingsHeaderHtml(){
+  const groupHeader=hasSplitGroupMatches() ? '<th>グループ</th>' : '';
+  const placeHeaders=getLeaguePointTable(getLeagueMatchSize()).map(function(_,index){
+    return '<th>'+(index+1)+'位</th>';
+  }).join('');
+  return '<tr><th>順位</th>'+groupHeader+'<th>参加者</th><th>Pt</th><th>試合</th>'+placeHeaders+'</tr>';
+}
+
+function createPlacementStatsCells(row){
+  return getLeaguePointTable(getLeagueMatchSize()).map(function(_,index){
+    return '<td>'+(row.places[index+1] || 0)+'</td>';
+  }).join('');
 }
 
 function createLeagueMatchesSection(){
@@ -9363,7 +9428,7 @@ function createLeaguePlayer(player,match){
   name.className='league-player-name';
   name.textContent=player;
   label.className='placement-label';
-  label.textContent=place ? place+'位 / '+getPlacementPoints(place)+'pt' : '順位未入力';
+  label.textContent=place ? place+'位 / '+getPlacementPoints(place,match.pointMode || match.players.length)+'pt' : '順位未入力';
   actions.className='placement-actions';
 
   for(let i=1;i<=maxPlace;i+=1){
@@ -9459,11 +9524,9 @@ function isLeagueMatchComplete(match){
   });
 }
 
-function getPlacementPoints(place){
-  if(place===1){return 10;}
-  if(place===2){return 8;}
-  if(place===3){return 5;}
-  return 3;
+function getPlacementPoints(place,playerCount){
+  const points=getLeaguePointTable(playerCount>=8 ? 8 : 4);
+  return points[place-1] || 0;
 }
 
 function getMatchFirstPlace(match){
@@ -9475,7 +9538,7 @@ function getMatchFirstPlace(match){
 
 function getLeagueStandings(){
   const table=names.map(function(name){
-    return {name:name,points:0,played:0,first:0,second:0,third:0,fourth:0};
+    return {name:name,points:0,played:0,first:0,second:0,third:0,fourth:0,places:{}};
   });
   const byName={};
   table.forEach(function(row){byName[row.name]=row;});
@@ -9489,7 +9552,8 @@ function getLeagueStandings(){
         if(!row || !place){return;}
 
         row.played+=1;
-        row.points+=getPlacementPoints(place);
+        row.points+=getPlacementPoints(place,match.pointMode || match.players.length);
+        row.places[place]=(row.places[place] || 0)+1;
         if(place===1){row.first+=1;}
         if(place===2){row.second+=1;}
         if(place===3){row.third+=1;}
@@ -9704,6 +9768,7 @@ function createPersistedState(){
     bracketSize:competitionMode==='league' ? names.length : bracketSize,
     leagueMatchLimit:leagueMatchLimit,
     splitGroupsEnabled:splitGroupsEnabled,
+    leagueMatchSize:leagueMatchSize,
     timerDurationSeconds:timerDurationSeconds,
     timerRemainingSeconds:timerRemainingSeconds,
     timerEndAt:timerEndAt,
@@ -9794,6 +9859,7 @@ function applyPersistedState(state){
   }
   leagueMatchLimit=state.leagueMatchLimit || '';
   splitGroupsEnabled=Boolean(state.splitGroupsEnabled);
+  leagueMatchSize=Number(state.leagueMatchSize)===8 ? 8 : 4;
   timerDurationSeconds=Number.isFinite(state.timerDurationSeconds) ? state.timerDurationSeconds : 70*60;
   timerRemainingSeconds=Number.isFinite(state.timerRemainingSeconds) ? state.timerRemainingSeconds : timerDurationSeconds;
   timerEndAt=Number.isFinite(state.timerEndAt) ? state.timerEndAt : null;
@@ -9906,6 +9972,7 @@ function clearSavedData(){
   eliminationMode='single';
   leagueMatchLimit='';
   splitGroupsEnabled=false;
+  leagueMatchSize=4;
   timerDurationSeconds=70*60;
   timerRemainingSeconds=timerDurationSeconds;
   timerEndAt=null;
@@ -9972,6 +10039,15 @@ document.getElementById('leagueMatchLimit').addEventListener('input',function(ev
     if(warning){
       warning.style.display='none';
     }
+  }
+  updateRegisterStats();
+  saveState();
+});
+document.getElementById('leagueMatchSize').addEventListener('change',function(event){
+  leagueMatchSize=Number(event.target.value)===8 ? 8 : 4;
+  updateModeUI();
+  if(names.length>0){
+    renderNames();
   }
   updateRegisterStats();
   saveState();
