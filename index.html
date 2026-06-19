@@ -4584,6 +4584,7 @@ body.viewer-mode .rule-hero .main-panel{
             </div>
             <button id="statsBtn" type="button">📊 統計</button>
             <button id="announceBtn" class="announce-open-btn" type="button">📢 対戦アナウンス</button>
+            <button id="addLeagueMatchBtn" class="btn secondary admin-only" type="button">試合を追加</button>
             <button id="broadcastBtn" class="btn secondary" type="button">配信用表示</button>
             <button id="printBtn" class="btn secondary admin-only" type="button">🖨 印刷・PDF出力</button>
             <button id="exportJsonBtn" class="data-btn admin-only" type="button">💾 JSON保存</button>
@@ -6023,6 +6024,7 @@ function renderBracket(){
     : '勝たせたい選手の「勝利」を押してください。勝った選手は右の枠へ進みます。';
   document.getElementById('zoomBracketBtn').style.display='';
   document.querySelector('.zoom-view-toggle').style.display='';
+  document.getElementById('addLeagueMatchBtn').style.display='none';
 
   bracketRounds.forEach(function(round,roundIndex){
     const column=document.createElement('section');
@@ -6132,6 +6134,7 @@ function renderDoubleBracket(){
   document.getElementById('roundNote').textContent='勝者側で負けた選手は敗者側へ移動します。敗者側で負けると2敗で敗退です。敗者側の勝者はグランドファイナルへ進みます。';
   document.getElementById('zoomBracketBtn').style.display='';
   document.querySelector('.zoom-view-toggle').style.display='';
+  document.getElementById('addLeagueMatchBtn').style.display='none';
 
   doubleBracket.winnerRounds.forEach(function(round,roundIndex){
     bracket.appendChild(createDoubleRoundColumn('勝者側 '+roundNameByIndexForDouble(roundIndex,doubleBracket.winnerRounds.length),round,'winner'));
@@ -9291,6 +9294,7 @@ renderBracket=function(){
     : '設定した合計試合数で'+getLeagueMatchSize()+'人マッチを作成しています。各マッチで順位を入力してください。';
   document.getElementById('zoomBracketBtn').style.display='none';
   document.querySelector('.zoom-view-toggle').style.display='none';
+  document.getElementById('addLeagueMatchBtn').style.display='';
 
   bracket.appendChild(createLeagueSummary(standings,totalMatches,completedMatches));
   bracket.appendChild(createStandingsSection(standings));
@@ -9638,6 +9642,76 @@ function appendNextDynamicGroupRound(roundIndex){
     leagueRounds.push(nextRound.slice(0,remaining));
   }else{
     leagueRounds.push(nextRound);
+  }
+}
+
+function addLeagueMatchManually(){
+  enableAdminAction();
+
+  if(competitionMode!=='league'){
+    return;
+  }
+
+  if(isDynamicEightGroupMode()){
+    addDynamicEightGroupRound();
+  }else{
+    addSingleLeagueRound();
+  }
+
+  renderBracket();
+  saveState();
+}
+
+function addDynamicEightGroupRound(){
+  const nextIndex=leagueRounds.length;
+  const groups=getCurrentEightPlayerGroups();
+  const nextRound=createDynamicGroupRound(groups,nextIndex);
+
+  if(nextRound.length>0){
+    leagueRounds.push(nextRound);
+  }
+}
+
+function getCurrentEightPlayerGroups(){
+  const lastRound=leagueRounds[leagueRounds.length-1] || [];
+
+  if(lastRound.length>=2 && lastRound.every(isLeagueMatchComplete)){
+    return createNextEightPlayerGroups(lastRound);
+  }
+
+  const groups=[
+    {name:'グループA',players:[]},
+    {name:'グループB',players:[]}
+  ];
+
+  lastRound.forEach(function(match){
+    const group=groups.find(function(item){return item.name===match.groupName;});
+    if(group){
+      group.players=[...match.players];
+    }
+  });
+
+  if(groups.every(function(group){return group.players.length===0;})){
+    return createLeagueGroups(names);
+  }
+
+  return groups;
+}
+
+function addSingleLeagueRound(){
+  const nextIndex=leagueRounds.length;
+  const extra=createRoundRobinSchedule(names,1);
+  const round=(extra[0] || []).map(function(match,index){
+    return Object.assign({},match,{
+      roundIndex:nextIndex,
+      matchIndex:index,
+      id:'r'+nextIndex+'m'+index,
+      placements:{}
+    });
+  });
+
+  if(round.length>0){
+    leagueRounds.push(round);
   }
 }
 
@@ -10364,6 +10438,7 @@ document.addEventListener('keydown',function(e){
 });
 document.getElementById('announceBtn').addEventListener('click',function(){openAnnounce();});
 document.getElementById('announceOverlay').addEventListener('click',closeAnnounce);
+document.getElementById('addLeagueMatchBtn').addEventListener('click',addLeagueMatchManually);
 
 document.getElementById('printBtn').addEventListener('click',printResults);
 document.getElementById('printPreviewCloseBtn').addEventListener('click',closePrintPreview);
