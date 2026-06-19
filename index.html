@@ -431,7 +431,7 @@ input:focus,textarea:focus,select:focus{
 
 .mode-switch{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
   gap:8px;
   margin:16px 0 6px;
   padding:6px;
@@ -4282,6 +4282,7 @@ body.viewer-mode .rule-hero .main-panel{
       <div class="mode-switch admin-only" aria-label="大会形式切り替え">
         <button id="modeTournamentBtn" type="button">トーナメント</button>
         <button id="modeLeagueBtn" type="button">4人ポイント</button>
+        <button id="modeLeague8Btn" type="button">8人ポイント</button>
       </div>
       <div id="setupEliminationSettings" class="mode-switch compact admin-only" aria-label="トーナメント形式切り替え">
         <button id="setupSingleElimBtn" type="button">シングル</button>
@@ -4311,6 +4312,7 @@ body.viewer-mode .rule-hero .main-panel{
         <div class="mode-switch compact admin-only" aria-label="ルールパターン切り替え">
           <button id="ruleTournamentModeBtn" type="button">トーナメント用</button>
           <button id="ruleLeagueModeBtn" type="button">4人ポイント用</button>
+          <button id="ruleLeague8ModeBtn" type="button">8人ポイント用</button>
         </div>
         <div class="stats">
           <div class="stat"><span>大会形式</span><strong id="ruleFormatView">4人マッチポイント制</strong></div>
@@ -4522,6 +4524,7 @@ body.viewer-mode .rule-hero .main-panel{
         <div class="mode-switch compact admin-only" aria-label="大会形式切り替え">
           <button id="registerModeTournamentBtn" type="button">トーナメント</button>
           <button id="registerModeLeagueBtn" type="button">4人ポイント</button>
+          <button id="registerModeLeague8Btn" type="button">8人ポイント</button>
         </div>
         <div id="registerEliminationSettings" class="mode-switch compact admin-only" aria-label="トーナメント形式切り替え">
           <button id="registerSingleElimBtn" type="button">シングル</button>
@@ -5169,6 +5172,9 @@ function setCompetitionMode(mode){
   competitionMode=mode;
   ruleInfo=ruleProfiles[competitionMode] || copyRuleInfo(mode==='league' ? leagueDefaultRuleInfo : tournamentDefaultRuleInfo);
   ruleProfiles[competitionMode]=ruleInfo;
+  if(competitionMode==='league'){
+    ruleInfo.format=getLeagueMatchSize()+'人マッチポイント制';
+  }
   lastMatchInfo=null;
   setBracketZoom(false);
   updateModeUI();
@@ -5189,6 +5195,11 @@ function setCompetitionMode(mode){
 
   saveRuleInfo();
   saveState();
+}
+
+function setLeaguePointMode(matchSize){
+  leagueMatchSize=matchSize===8 ? 8 : 4;
+  setCompetitionMode('league');
 }
 
 function setEliminationMode(mode){
@@ -5216,14 +5227,19 @@ function setEliminationMode(mode){
 
 function updateModeButtons(){
   const isLeague=competitionMode==='league';
+  const isLeague4=isLeague && getLeagueMatchSize()===4;
+  const isLeague8=isLeague && getLeagueMatchSize()===8;
   const isDouble=eliminationMode==='double';
   [
     ['modeTournamentBtn',!isLeague],
-    ['modeLeagueBtn',isLeague],
+    ['modeLeagueBtn',isLeague4],
+    ['modeLeague8Btn',isLeague8],
     ['registerModeTournamentBtn',!isLeague],
-    ['registerModeLeagueBtn',isLeague],
+    ['registerModeLeagueBtn',isLeague4],
+    ['registerModeLeague8Btn',isLeague8],
     ['ruleTournamentModeBtn',!isLeague],
-    ['ruleLeagueModeBtn',isLeague],
+    ['ruleLeagueModeBtn',isLeague4],
+    ['ruleLeague8ModeBtn',isLeague8],
     ['setupSingleElimBtn',!isDouble],
     ['setupDoubleElimBtn',isDouble],
     ['registerSingleElimBtn',!isDouble],
@@ -8789,6 +8805,10 @@ function isTournamentCreateSelected(){
   const registerTournamentButton=document.getElementById('registerModeTournamentBtn');
   const setupTournamentButton=document.getElementById('modeTournamentBtn');
 
+  if(competitionMode==='league'){
+    return false;
+  }
+
   return competitionMode==='tournament' ||
     (makeButton && makeButton.textContent.includes('トーナメント')) ||
     (registerTournamentButton && registerTournamentButton.classList.contains('active')) ||
@@ -10121,7 +10141,10 @@ document.getElementById('modeTournamentBtn').addEventListener('click',function()
   setCompetitionMode('tournament');
 });
 document.getElementById('modeLeagueBtn').addEventListener('click',function(){
-  setCompetitionMode('league');
+  setLeaguePointMode(4);
+});
+document.getElementById('modeLeague8Btn').addEventListener('click',function(){
+  setLeaguePointMode(8);
 });
 document.getElementById('setupSingleElimBtn').addEventListener('click',function(){
   setEliminationMode('single');
@@ -10133,7 +10156,10 @@ document.getElementById('registerModeTournamentBtn').addEventListener('click',fu
   setCompetitionMode('tournament');
 });
 document.getElementById('registerModeLeagueBtn').addEventListener('click',function(){
-  setCompetitionMode('league');
+  setLeaguePointMode(4);
+});
+document.getElementById('registerModeLeague8Btn').addEventListener('click',function(){
+  setLeaguePointMode(8);
 });
 document.getElementById('registerSingleElimBtn').addEventListener('click',function(){
   setEliminationMode('single');
@@ -10156,13 +10182,7 @@ document.getElementById('leagueMatchLimit').addEventListener('input',function(ev
   saveState();
 });
 document.getElementById('leagueMatchSize').addEventListener('change',function(event){
-  leagueMatchSize=Number(event.target.value)===8 ? 8 : 4;
-  updateModeUI();
-  if(names.length>0){
-    renderNames();
-  }
-  updateRegisterStats();
-  saveState();
+  setLeaguePointMode(Number(event.target.value)===8 ? 8 : 4);
 });
 document.getElementById('splitGroupsToggle').addEventListener('change',function(event){
   splitGroupsEnabled=event.target.checked;
@@ -10195,7 +10215,10 @@ document.getElementById('ruleTournamentModeBtn').addEventListener('click',functi
   setCompetitionMode('tournament');
 });
 document.getElementById('ruleLeagueModeBtn').addEventListener('click',function(){
-  setCompetitionMode('league');
+  setLeaguePointMode(4);
+});
+document.getElementById('ruleLeague8ModeBtn').addEventListener('click',function(){
+  setLeaguePointMode(8);
 });
 document.querySelectorAll('.rule-tab').forEach(function(button){
   button.addEventListener('click',function(){
