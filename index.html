@@ -478,6 +478,41 @@ input:focus,textarea:focus,select:focus{
   text-align:center;
 }
 
+.group-split-control{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  margin-top:12px;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.045);
+  cursor:pointer;
+}
+
+.group-split-control input{
+  width:auto;
+  min-height:auto;
+  margin-top:3px;
+  accent-color:var(--gold);
+}
+
+.group-split-control strong{
+  display:block;
+  color:var(--gold-2);
+  font-size:13px;
+  font-weight:900;
+}
+
+.group-split-control span{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+  line-height:1.45;
+}
+
 .btn{
   min-height:52px;
   border-radius:8px;
@@ -4494,6 +4529,13 @@ body.viewer-mode .rule-hero .main-panel{
         <div id="leagueSettings" class="league-settings admin-only">
           <label class="label" for="leagueMatchLimit">合計試合数</label>
           <input id="leagueMatchLimit" type="number" min="1" max="999" inputmode="numeric" placeholder="合計試合数を入力してください">
+          <label class="group-split-control" for="splitGroupsToggle">
+            <input id="splitGroupsToggle" type="checkbox">
+            <span>
+              <strong>2グループに分割</strong>
+              <span>A/Bに分け、同じグループ内だけで対戦カードを作成します。</span>
+            </span>
+          </label>
           <div id="leagueMatchWarn" class="warning">⚠ 合計試合数を入力してください</div>
         </div>
         <p id="formatNote" class="note" style="margin-top:14px">エンジョイ大乱闘用です。合計試合数を入力してください。タイム制6分、ギミックあり、アイテムあり、順位ポイントは10/8/5/3です。</p>
@@ -4703,6 +4745,7 @@ let zoomViewMode='list';
 let competitionMode='tournament';
 let eliminationMode='single';
 let leagueMatchLimit='';
+let splitGroupsEnabled=false;
 let pageRole='admin';
 let timerDurationSeconds=70*60;
 let timerRemainingSeconds=70*60;
@@ -5118,6 +5161,9 @@ function setCompetitionMode(mode){
   lastMatchInfo=null;
   setBracketZoom(false);
   updateModeUI();
+  if(names.length>0){
+    renderNames();
+  }
   renderRulesPage();
 
   if(getActivePhaseId()==='bracketPage'){
@@ -5191,6 +5237,7 @@ function updateModeUI(){
   const setupEliminationSettings=document.getElementById('setupEliminationSettings');
   const registerEliminationSettings=document.getElementById('registerEliminationSettings');
   const leagueMatchLimitInput=document.getElementById('leagueMatchLimit');
+  const splitGroupsToggle=document.getElementById('splitGroupsToggle');
 
   updateModeButtons();
 
@@ -5230,9 +5277,15 @@ function updateModeUI(){
     leagueMatchLimitInput.value=leagueMatchLimit || '';
   }
 
+  if(splitGroupsToggle){
+    splitGroupsToggle.checked=splitGroupsEnabled;
+  }
+
   if(formatNote){
     formatNote.textContent=isLeague
-      ? 'エンジョイ大乱闘用です。合計試合数を入力してください。タイム制6分、ギミックあり、アイテムあり、順位ポイントは10/8/5/3です。'
+      ? (splitGroupsEnabled
+        ? 'エンジョイ大乱闘用です。参加者をA/Bの2グループに分け、同じグループ内で対戦カードを作ります。'
+        : 'エンジョイ大乱闘用です。合計試合数を入力してください。タイム制6分、ギミックあり、アイテムあり、順位ポイントは10/8/5/3です。')
       : (isDouble
         ? 'ダブルエリミネーション用です。1回負けると敗者側へ移動し、2回負けると敗退です。'
         : '2,4,8,16,32人は通常トーナメント、それ以外は次の2の累乗枠にして不戦勝を自動割り当てします。');
@@ -5661,7 +5714,7 @@ function renderNames(){
     box.className='name-box';
     box.style.setProperty('--player-color',playerPalette[index%playerPalette.length]);
     label.setAttribute('for','player-'+index);
-    label.textContent='#'+(index+1);
+    label.textContent='#'+(index+1)+getRegistrationGroupSuffix(index);
     input.id='player-'+index;
     input.value=name;
     input.autocomplete='off';
@@ -5676,6 +5729,14 @@ function renderNames(){
     box.appendChild(input);
     grid.appendChild(box);
   });
+}
+
+function getRegistrationGroupSuffix(index){
+  if(competitionMode!=='league' || !splitGroupsEnabled || names.length<4){
+    return '';
+  }
+
+  return index%2===0 ? ' / A' : ' / B';
 }
 
 function updateRegisterStats(){
@@ -8699,7 +8760,7 @@ makeBracket=function(){
     return name.trim() || '参加者'+(index+1);
   });
 
-  leagueRounds=createRoundRobinSchedule(names,getConfiguredLeagueMatchLimit());
+  leagueRounds=createLeagueSchedule(names,getConfiguredLeagueMatchLimit());
   bracketRounds=[];
   bracketSize=names.length;
   lastCelebratedWinner='';
@@ -8710,6 +8771,95 @@ makeBracket=function(){
   renderBracket();
   saveState();
 };
+
+function createLeagueSchedule(players,matchLimit){
+  if(!splitGroupsEnabled || players.length<4){
+    return createRoundRobinSchedule(players,matchLimit);
+  }
+
+  return createSplitGroupSchedule(players,matchLimit);
+}
+
+function createSplitGroupSchedule(players,matchLimit){
+  const groups=createLeagueGroups(players);
+  const schedules=groups.map(function(group,index){
+    const groupLimit=matchLimit ? Math.max(1,Math.floor(matchLimit/groups.length)+(index<matchLimit%groups.length ? 1 : 0)) : null;
+    return {
+      name:group.name,
+      rounds:createRoundRobinSchedule(group.players,groupLimit)
+    };
+  });
+  const maxRoundCount=schedules.reduce(function(max,schedule){
+    return Math.max(max,schedule.rounds.length);
+  },0);
+  const combined=[];
+
+  for(let roundIndex=0;roundIndex<maxRoundCount;roundIndex+=1){
+    const matches=[];
+    schedules.forEach(function(schedule){
+      const round=schedule.rounds[roundIndex] || [];
+      round.forEach(function(match){
+        matches.push(Object.assign({},match,{
+          groupName:schedule.name,
+          roundIndex:roundIndex,
+          matchIndex:matches.length,
+          id:'r'+roundIndex+'m'+matches.length,
+          placements:match.placements || {}
+        }));
+      });
+    });
+    if(matches.length>0){
+      combined.push(matches);
+    }
+  }
+
+  return matchLimit ? trimLeagueRounds(combined,matchLimit) : combined;
+}
+
+function createLeagueGroups(players){
+  const groups=[
+    {name:'グループA',players:[]},
+    {name:'グループB',players:[]}
+  ];
+
+  players.forEach(function(player,index){
+    groups[index%2].players.push(player);
+  });
+
+  return groups.filter(function(group){
+    return group.players.length>0;
+  });
+}
+
+function trimLeagueRounds(rounds,matchLimit){
+  const trimmed=[];
+  let total=0;
+
+  rounds.forEach(function(round){
+    if(total>=matchLimit){
+      return;
+    }
+
+    const nextRound=[];
+    round.forEach(function(match){
+      if(total>=matchLimit){
+        return;
+      }
+      nextRound.push(Object.assign({},match,{
+        roundIndex:trimmed.length,
+        matchIndex:nextRound.length,
+        id:'r'+trimmed.length+'m'+nextRound.length
+      }));
+      total+=1;
+    });
+
+    if(nextRound.length>0){
+      trimmed.push(nextRound);
+    }
+  });
+
+  return trimmed;
+}
 
 function validateLeagueMatchLimit(){
   const warning=document.getElementById('leagueMatchWarn');
@@ -8972,10 +9122,12 @@ renderBracket=function(){
   }
 
   document.getElementById('roundTitle').textContent='4人マッチ ポイント表';
-  document.getElementById('roundBadge').textContent=names.length+'名 / '+totalMatches+'試合';
+  document.getElementById('roundBadge').textContent=names.length+'名 / '+totalMatches+'試合'+(hasSplitGroupMatches() ? ' / 2グループ' : '');
   document.getElementById('statRound').textContent=leagueRounds.length;
   document.getElementById('statRemain').textContent=Math.max(0,totalMatches-completedMatches);
-  document.getElementById('roundNote').textContent='設定した合計試合数で4人マッチを作成しています。各マッチで1位から4位を入力してください。';
+  document.getElementById('roundNote').textContent=hasSplitGroupMatches()
+    ? '参加者をA/Bの2グループに分け、同じグループ内だけで対戦カードを作成しています。'
+    : '設定した合計試合数で4人マッチを作成しています。各マッチで1位から4位を入力してください。';
   document.getElementById('zoomBracketBtn').style.display='none';
   document.querySelector('.zoom-view-toggle').style.display='none';
 
@@ -9006,6 +9158,7 @@ function createLeagueSummary(standings,totalMatches,completedMatches){
   const coverage=getPairCoverage();
   const items=[
     ['参加者',names.length+'名'],
+    ['グループ',hasSplitGroupMatches() ? 'A / B' : 'なし'],
     ['総試合数',totalMatches+'試合'],
     ['消化試合',completedMatches+' / '+totalMatches],
     ['対戦ペア',coverage.covered+' / '+coverage.total],
@@ -9030,9 +9183,18 @@ function createLeagueSummary(standings,totalMatches,completedMatches){
 
 function getPairCoverage(){
   const pairs={};
+  const groupPlayers={};
 
   leagueRounds.forEach(function(round){
     round.forEach(function(match){
+      if(match.groupName){
+        if(!groupPlayers[match.groupName]){
+          groupPlayers[match.groupName]={};
+        }
+        match.players.forEach(function(player){
+          groupPlayers[match.groupName][player]=true;
+        });
+      }
       for(let i=0;i<match.players.length;i+=1){
         for(let j=i+1;j<match.players.length;j+=1){
           pairs[getPairKey(match.players[i],match.players[j])]=true;
@@ -9041,10 +9203,38 @@ function getPairCoverage(){
     });
   });
 
+  const groupNames=Object.keys(groupPlayers);
+  const total=groupNames.length>0
+    ? groupNames.reduce(function(sum,groupName){
+      const count=Object.keys(groupPlayers[groupName]).length;
+      return sum+(count>1 ? count*(count-1)/2 : 0);
+    },0)
+    : (names.length>1 ? names.length*(names.length-1)/2 : 0);
+
   return {
     covered:Object.keys(pairs).length,
-    total:names.length>1 ? names.length*(names.length-1)/2 : 0
+    total:total
   };
+}
+
+function hasSplitGroupMatches(){
+  return leagueRounds.some(function(round){
+    return round.some(function(match){
+      return Boolean(match.groupName);
+    });
+  });
+}
+
+function getPlayerGroupName(player){
+  for(let i=0;i<leagueRounds.length;i+=1){
+    for(let j=0;j<leagueRounds[i].length;j+=1){
+      const match=leagueRounds[i][j];
+      if(match.groupName && match.players.includes(player)){
+        return match.groupName.replace('グループ','');
+      }
+    }
+  }
+  return '-';
 }
 
 function createStandingsSection(standings){
@@ -9060,12 +9250,16 @@ function createStandingsSection(standings){
   title.innerHTML='<h3>順位表</h3><span class="badge">1位10 / 2位8 / 3位5 / 4位3</span>';
   scroll.className='table-scroll';
   table.className='standings-table';
-  thead.innerHTML='<tr><th>順位</th><th>参加者</th><th>Pt</th><th>試合</th><th>1位</th><th>2位</th><th>3位</th><th>4位</th></tr>';
+  thead.innerHTML=hasSplitGroupMatches()
+    ? '<tr><th>順位</th><th>グループ</th><th>参加者</th><th>Pt</th><th>試合</th><th>1位</th><th>2位</th><th>3位</th><th>4位</th></tr>'
+    : '<tr><th>順位</th><th>参加者</th><th>Pt</th><th>試合</th><th>1位</th><th>2位</th><th>3位</th><th>4位</th></tr>';
 
   standings.forEach(function(row,index){
     const tr=document.createElement('tr');
+    const groupCell=hasSplitGroupMatches() ? '<td>'+escapeHtml(getPlayerGroupName(row.name))+'</td>' : '';
     tr.innerHTML=
       '<td>'+(index+1)+'</td>'+
+      groupCell+
       '<td><span class="player-cell" style="--player-color:'+getPlayerColor(row.name)+'">'+escapeHtml(row.name)+'</span></td>'+
       '<td>'+row.points+'</td>'+
       '<td>'+row.played+'</td>'+
@@ -9124,7 +9318,7 @@ function createLeagueMatchCard(match){
 
   card.className='league-match';
   head.className='league-match-head';
-  head.innerHTML='<span>MATCH '+(match.matchIndex+1)+'</span><span>'+getLeagueResultLabel(match)+'</span>';
+  head.innerHTML='<span>'+(match.groupName ? escapeHtml(match.groupName)+' / ' : '')+'MATCH '+(match.matchIndex+1)+'</span><span>'+getLeagueResultLabel(match)+'</span>';
   var expandBtn=document.createElement('button');
   expandBtn.type='button';
   expandBtn.className='match-expand-btn';
@@ -9509,6 +9703,7 @@ function createPersistedState(){
     leagueRounds:leagueRounds,
     bracketSize:competitionMode==='league' ? names.length : bracketSize,
     leagueMatchLimit:leagueMatchLimit,
+    splitGroupsEnabled:splitGroupsEnabled,
     timerDurationSeconds:timerDurationSeconds,
     timerRemainingSeconds:timerRemainingSeconds,
     timerEndAt:timerEndAt,
@@ -9598,6 +9793,7 @@ function applyPersistedState(state){
     }
   }
   leagueMatchLimit=state.leagueMatchLimit || '';
+  splitGroupsEnabled=Boolean(state.splitGroupsEnabled);
   timerDurationSeconds=Number.isFinite(state.timerDurationSeconds) ? state.timerDurationSeconds : 70*60;
   timerRemainingSeconds=Number.isFinite(state.timerRemainingSeconds) ? state.timerRemainingSeconds : timerDurationSeconds;
   timerEndAt=Number.isFinite(state.timerEndAt) ? state.timerEndAt : null;
@@ -9709,6 +9905,7 @@ function clearSavedData(){
   bracketSize=2;
   eliminationMode='single';
   leagueMatchLimit='';
+  splitGroupsEnabled=false;
   timerDurationSeconds=70*60;
   timerRemainingSeconds=timerDurationSeconds;
   timerEndAt=null;
@@ -9775,6 +9972,15 @@ document.getElementById('leagueMatchLimit').addEventListener('input',function(ev
     if(warning){
       warning.style.display='none';
     }
+  }
+  updateRegisterStats();
+  saveState();
+});
+document.getElementById('splitGroupsToggle').addEventListener('change',function(event){
+  splitGroupsEnabled=event.target.checked;
+  updateModeUI();
+  if(names.length>0){
+    renderNames();
   }
   updateRegisterStats();
   saveState();
