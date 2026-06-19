@@ -4807,6 +4807,7 @@ const leagueDefaultRuleInfo={
     '大会順位はポイント制',
     '1位10p / 2位8p / 3位5p / 4位3p',
     '8人版: 1位10p / 2位8p / 3位6p / 4位4p / 5位4p / 6位4p / 7位2p / 8位1p',
+    '8人版グループ移動: Aの1〜4位は次回Bへ、Bの5〜8位は次回Aへ移動',
     '70分程度を目安に大会を進行',
     '時間終了時の総獲得ポイントが多い人が優勝'
   ],
@@ -5072,6 +5073,7 @@ function applyEnjoyLeagueRules(){
     '大会順位はポイント制',
     '1位10p / 2位8p / 3位5p / 4位3p',
     '8人版: 1位10p / 2位8p / 3位6p / 4位4p / 5位4p / 6位4p / 7位2p / 8位1p',
+    '8人版グループ移動: Aの1〜4位は次回Bへ、Bの5〜8位は次回Aへ移動',
     '70分程度を目安に大会を進行',
     '時間終了時の総獲得ポイントが多い人が優勝'
   ];
@@ -5080,7 +5082,7 @@ function applyEnjoyLeagueRules(){
   ruleProfiles.league.tournamentName='エンジョイ大乱闘';
   ruleProfiles.league.format='4人マッチポイント制';
   ruleProfiles.league.rules=ruleProfiles.league.rules.filter(function(rule){
-    return !/^1位(4点|10p)|^1位4点|^1位10p|^8人版:|^タイム制 6分$|^乱闘$/.test(rule);
+    return !/^1位(4点|10p)|^1位4点|^1位10p|^8人版|^タイム制 6分$|^乱闘$/.test(rule);
   });
 
   enjoyRules.forEach(function(rule){
@@ -8832,6 +8834,10 @@ function createLeagueSchedule(players,matchLimit){
 }
 
 function createSplitGroupSchedule(players,matchLimit){
+  if(getLeagueMatchSize()===8){
+    return createDynamicEightPlayerGroupSchedule(players);
+  }
+
   const groups=createLeagueGroups(players);
   const schedules=groups.map(function(group,index){
     const groupLimit=matchLimit ? Math.max(1,Math.floor(matchLimit/groups.length)+(index<matchLimit%groups.length ? 1 : 0)) : null;
@@ -8866,6 +8872,33 @@ function createSplitGroupSchedule(players,matchLimit){
   }
 
   return matchLimit ? trimLeagueRounds(combined,matchLimit) : combined;
+}
+
+function createDynamicEightPlayerGroupSchedule(players){
+  const groups=createLeagueGroups(players);
+  return [createDynamicGroupRound(groups,0)];
+}
+
+function createDynamicGroupRound(groups,roundIndex){
+  const matches=[];
+
+  groups.forEach(function(group){
+    if(group.players.length<2){
+      return;
+    }
+
+    matches.push({
+      id:'r'+roundIndex+'m'+matches.length,
+      roundIndex:roundIndex,
+      matchIndex:matches.length,
+      groupName:group.name,
+      pointMode:8,
+      players:[...group.players],
+      placements:{}
+    });
+  });
+
+  return matches;
 }
 
 function createLeagueGroups(players){
@@ -9182,7 +9215,9 @@ renderBracket=function(){
   document.getElementById('statRound').textContent=leagueRounds.length;
   document.getElementById('statRemain').textContent=Math.max(0,totalMatches-completedMatches);
   document.getElementById('roundNote').textContent=hasSplitGroupMatches()
-    ? '参加者をA/Bの2グループに分け、同じグループ内だけで対戦カードを作成しています。'
+    ? (isDynamicEightGroupMode()
+      ? 'A/Bの8人大乱闘です。Aの1〜4位は次回Bへ、Bの5〜8位は次回Aへ移動します。'
+      : '参加者をA/Bの2グループに分け、同じグループ内だけで対戦カードを作成しています。')
     : '設定した合計試合数で'+getLeagueMatchSize()+'人マッチを作成しています。各マッチで順位を入力してください。';
   document.getElementById('zoomBracketBtn').style.display='none';
   document.querySelector('.zoom-view-toggle').style.display='none';
@@ -9402,7 +9437,9 @@ function createLeagueMatchCard(match){
   });
 
   actions.className='result-actions';
-  actions.textContent='各参加者の順位を選択してください。全員分の順位が入ると試合消化になります。';
+  actions.textContent=isDynamicEightGroupMode()
+    ? '全員分の順位が入ると次回戦のA/Bグループが自動で組み替わります。'
+    : '各参加者の順位を選択してください。全員分の順位が入ると試合消化になります。';
 
   card.appendChild(head);
   card.appendChild(players);
@@ -9493,8 +9530,83 @@ function setLeaguePlacement(roundIndex,matchIndex,player,place){
     winner:firstPlace || '1位未入力',
     status:getLeagueResultLabel(match)
   };
+  appendNextDynamicGroupRound(roundIndex);
   renderBracket();
   saveState();
+}
+
+function appendNextDynamicGroupRound(roundIndex){
+  if(!isDynamicEightGroupMode()){
+    return;
+  }
+
+  const matchLimit=getConfiguredLeagueMatchLimit();
+  if(matchLimit && getActualLeagueMatchCount()>=matchLimit){
+    return;
+  }
+
+  const round=leagueRounds[roundIndex];
+  if(!round || round.length<2 || !round.every(isLeagueMatchComplete)){
+    return;
+  }
+
+  if(leagueRounds[roundIndex+1]){
+    return;
+  }
+
+  const nextGroups=createNextEightPlayerGroups(round);
+  const nextRound=createDynamicGroupRound(nextGroups,roundIndex+1);
+  if(nextRound.length===0){
+    return;
+  }
+
+  if(matchLimit){
+    const remaining=matchLimit-getActualLeagueMatchCount();
+    if(remaining<=0){
+      return;
+    }
+    leagueRounds.push(nextRound.slice(0,remaining));
+  }else{
+    leagueRounds.push(nextRound);
+  }
+}
+
+function isDynamicEightGroupMode(){
+  return competitionMode==='league' && splitGroupsEnabled && getLeagueMatchSize()===8;
+}
+
+function createNextEightPlayerGroups(round){
+  const matchA=getGroupMatch(round,'グループA');
+  const matchB=getGroupMatch(round,'グループB');
+
+  if(!matchA || !matchB){
+    return [];
+  }
+
+  const rankedA=getRankedMatchPlayers(matchA);
+  const rankedB=getRankedMatchPlayers(matchB);
+  const stayA=rankedA.slice(4);
+  const moveAToB=rankedA.slice(0,4);
+  const stayB=rankedB.slice(0,4);
+  const moveBToA=rankedB.slice(4);
+
+  return [
+    {name:'グループA',players:stayA.concat(moveBToA)},
+    {name:'グループB',players:stayB.concat(moveAToB)}
+  ];
+}
+
+function getGroupMatch(round,groupName){
+  return round.find(function(match){
+    return match.groupName===groupName;
+  });
+}
+
+function getRankedMatchPlayers(match){
+  const placements=match.placements || {};
+  return [...match.players].sort(function(a,b){
+    return (placements[a] || 999)-(placements[b] || 999);
+  });
 }
 
 function getLeagueResultLabel(match){
