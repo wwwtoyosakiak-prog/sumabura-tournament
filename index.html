@@ -9732,7 +9732,30 @@ function getCurrentEightPlayerGroups(){
     return createLeagueGroups(names);
   }
 
-  return groups;
+  return balanceEightPlayerGroups(groups);
+}
+
+function balanceEightPlayerGroups(groups){
+  const groupA=groups.find(function(group){return group.name==='グループA';}) || {name:'グループA',players:[]};
+  const groupB=groups.find(function(group){return group.name==='グループB';}) || {name:'グループB',players:[]};
+  const difference=Math.abs(groupA.players.length-groupB.players.length);
+
+  if(difference<=1){
+    return groups;
+  }
+
+  const balanced=[
+    {name:'グループA',players:[]},
+    {name:'グループB',players:[]}
+  ];
+
+  groupA.players.concat(groupB.players).forEach(function(player,index){
+    balanced[index%2].players.push(player);
+  });
+
+  return balanced.filter(function(group){
+    return group.players.length>0;
+  });
 }
 
 function addSingleLeagueRound(){
@@ -9766,15 +9789,21 @@ function createNextEightPlayerGroups(round){
 
   const rankedA=getRankedMatchPlayers(matchA);
   const rankedB=getRankedMatchPlayers(matchB);
-  const stayA=rankedA.slice(4);
-  const moveAToB=rankedA.slice(0,4);
-  const stayB=rankedB.slice(0,4);
-  const moveBToA=rankedB.slice(4);
+  const moveACount=getEightPlayerGroupMoveCount(rankedA.length);
+  const moveBCount=getEightPlayerGroupMoveCount(rankedB.length);
+  const stayA=rankedA.slice(moveACount);
+  const moveAToB=rankedA.slice(0,moveACount);
+  const stayB=rankedB.slice(0,rankedB.length-moveBCount);
+  const moveBToA=rankedB.slice(rankedB.length-moveBCount);
 
   return [
     {name:'グループA',players:stayA.concat(moveBToA)},
     {name:'グループB',players:stayB.concat(moveAToB)}
   ];
+}
+
+function getEightPlayerGroupMoveCount(playerCount){
+  return Math.max(1,Math.floor(playerCount/2));
 }
 
 function getGroupMatch(round,groupName){
