@@ -4283,6 +4283,7 @@ body.viewer-mode .rule-hero .main-panel{
         <button id="modeTournamentBtn" type="button">トーナメント</button>
         <button id="modeLeagueBtn" type="button">4人ポイント</button>
         <button id="modeLeague8Btn" type="button">8人ポイント</button>
+        <button id="modeLeague18Btn" type="button">18人全員対戦</button>
       </div>
       <div id="setupEliminationSettings" class="mode-switch compact admin-only" aria-label="トーナメント形式切り替え">
         <button id="setupSingleElimBtn" type="button">シングル</button>
@@ -4525,6 +4526,7 @@ body.viewer-mode .rule-hero .main-panel{
           <button id="registerModeTournamentBtn" type="button">トーナメント</button>
           <button id="registerModeLeagueBtn" type="button">4人ポイント</button>
           <button id="registerModeLeague8Btn" type="button">8人ポイント</button>
+          <button id="registerModeLeague18Btn" type="button">18人全員対戦</button>
         </div>
         <div id="registerEliminationSettings" class="mode-switch compact admin-only" aria-label="トーナメント形式切り替え">
           <button id="registerSingleElimBtn" type="button">シングル</button>
@@ -4757,6 +4759,7 @@ let eliminationMode='single';
 let leagueMatchLimit='';
 let splitGroupsEnabled=false;
 let leagueMatchSize=4;
+let leagueScheduleMode='standard';
 let pageRole='admin';
 let timerDurationSeconds=70*60;
 let timerRemainingSeconds=70*60;
@@ -5199,9 +5202,26 @@ function setCompetitionMode(mode){
 }
 
 function setLeaguePointMode(matchSize){
+  leagueScheduleMode='standard';
   leagueMatchSize=matchSize===8 ? 8 : 4;
   splitGroupsEnabled=true;
   setCompetitionMode('league');
+}
+
+function setLeague18Mode(){
+  leagueScheduleMode='all18';
+  leagueMatchSize=4;
+  leagueMatchLimit='27';
+  splitGroupsEnabled=false;
+  const countInput=document.getElementById('count');
+  if(countInput){
+    countInput.value='18';
+  }
+  setCompetitionMode('league');
+}
+
+function isLeague18Mode(){
+  return competitionMode==='league' && leagueScheduleMode==='all18';
 }
 
 function setEliminationMode(mode){
@@ -5231,14 +5251,17 @@ function updateModeButtons(){
   const isLeague=competitionMode==='league';
   const isLeague4=isLeague && getLeagueMatchSize()===4;
   const isLeague8=isLeague && getLeagueMatchSize()===8;
+  const isLeague18=isLeague18Mode();
   const isDouble=eliminationMode==='double';
   [
     ['modeTournamentBtn',!isLeague],
-    ['modeLeagueBtn',isLeague4],
+    ['modeLeagueBtn',isLeague4 && !isLeague18],
     ['modeLeague8Btn',isLeague8],
+    ['modeLeague18Btn',isLeague18],
     ['registerModeTournamentBtn',!isLeague],
-    ['registerModeLeagueBtn',isLeague4],
+    ['registerModeLeagueBtn',isLeague4 && !isLeague18],
     ['registerModeLeague8Btn',isLeague8],
+    ['registerModeLeague18Btn',isLeague18],
     ['ruleTournamentModeBtn',!isLeague],
     ['ruleLeagueModeBtn',isLeague4],
     ['ruleLeague8ModeBtn',isLeague8],
@@ -5269,15 +5292,18 @@ function updateModeUI(){
   const leagueMatchSizeInput=document.getElementById('leagueMatchSize');
   const splitGroupsToggle=document.getElementById('splitGroupsToggle');
   const matchSize=getLeagueMatchSize();
+  const isLeague18=isLeague18Mode();
 
   updateModeButtons();
 
   if(eyebrow){
-    eyebrow.textContent=isLeague ? matchSize+' PLAYER POINTS' : (isDouble ? 'DOUBLE ELIMINATION' : 'SINGLE ELIMINATION');
+    eyebrow.textContent=isLeague18 ? '18 PLAYER ALL MATCH' : (isLeague ? matchSize+' PLAYER POINTS' : (isDouble ? 'DOUBLE ELIMINATION' : 'SINGLE ELIMINATION'));
   }
 
   if(lead){
-    lead.textContent=isLeague
+    lead.textContent=isLeague18
+      ? '18人で4人対戦を行い、各参加者が6試合で全員と対戦します。'
+      : isLeague
       ? '参加人数を入力してエンジョイ大乱闘を開始してください。'+matchSize+'人1組のタイム制乱闘をポイントで順位化します。'
       : (isDouble
         ? '参加人数を入力して大会を開始してください。1回負けても敗者側から復活できる形式です。'
@@ -5285,7 +5311,7 @@ function updateModeUI(){
   }
 
   if(makeButton){
-    makeButton.textContent=isLeague ? matchSize+'人マッチ表作成' : (isDouble ? 'ダブルトーナメント作成' : 'トーナメント作成');
+    makeButton.textContent=isLeague18 ? '18人全員対戦表作成' : (isLeague ? matchSize+'人マッチ表作成' : (isDouble ? 'ダブルトーナメント作成' : 'トーナメント作成'));
   }
 
   if(statLabel){
@@ -5307,18 +5333,26 @@ function updateModeUI(){
   if(leagueMatchLimitInput && leagueMatchLimitInput.value!==String(leagueMatchLimit || '')){
     leagueMatchLimitInput.value=leagueMatchLimit || '';
   }
+  if(leagueMatchLimitInput){
+    leagueMatchLimitInput.disabled=isLeague18;
+  }
 
   if(leagueMatchSizeInput && leagueMatchSizeInput.value!==String(matchSize)){
     leagueMatchSizeInput.value=String(matchSize);
   }
+  if(leagueMatchSizeInput){
+    leagueMatchSizeInput.disabled=isLeague18;
+  }
 
   if(splitGroupsToggle){
     splitGroupsToggle.checked=splitGroupsEnabled;
-    splitGroupsToggle.disabled=isLeague;
+    splitGroupsToggle.disabled=isLeague || isLeague18;
   }
 
   if(formatNote){
-    formatNote.textContent=isLeague
+    formatNote.textContent=isLeague18
+      ? '18人専用です。4人戦を全27試合行い、全員が6試合でほかの17人全員と最低1回対戦します。'
+      : isLeague
       ? (splitGroupsEnabled
         ? (matchSize===8
           ? '8人ポイント制です。参加者をA/Bの2グループに分け、2試合同時に進行します。合計試合数が空欄なら、結果入力ごとに次の2試合を追加します。'
@@ -8861,6 +8895,10 @@ function validateLeagueSetup(){
     return false;
   }
 
+  if(isLeague18Mode()){
+    return true;
+  }
+
   if(isDynamicEightGroupMode()){
     const warning=document.getElementById('leagueMatchWarn');
     if(warning){
@@ -8874,6 +8912,15 @@ function validateLeagueSetup(){
 
 function validateLeaguePlayerCount(){
   const warning=document.getElementById('leagueMatchWarn');
+
+  if(isLeague18Mode() && names.length!==18){
+    if(warning){
+      warning.textContent='⚠ 18人全員対戦モードは参加者を18人にしてください';
+      warning.style.display='block';
+    }
+    show('register');
+    return false;
+  }
 
   if(isDynamicEightGroupMode() && names.length>16){
     if(warning){
@@ -8897,11 +8944,53 @@ function validateLeaguePlayerCount(){
 }
 
 function createLeagueSchedule(players,matchLimit){
+  if(isLeague18Mode()){
+    return createAll18LeagueSchedule(players);
+  }
+
   if(!splitGroupsEnabled || players.length<4){
     return createRoundRobinSchedule(players,matchLimit);
   }
 
   return createSplitGroupSchedule(players,matchLimit);
+}
+
+function createAll18LeagueSchedule(players){
+  const blocks=[
+    [16,2,9,12],[4,17,11,0],[6,13,15,5],[7,10,4,17],[10,6,3,16],
+    [11,9,7,16],[9,4,13,8],[9,1,5,10],[7,5,0,6],[12,10,8,0],
+    [14,13,2,7],[14,2,0,10],[3,11,7,1],[6,14,17,9],[8,2,11,6],
+    [11,14,12,5],[1,3,14,8],[15,16,4,14],[1,16,0,13],[17,1,2,15],
+    [2,3,5,4],[8,12,15,7],[13,11,15,10],[16,17,8,5],[17,3,12,13],
+    [15,0,3,9],[4,6,1,12]
+  ];
+  const rounds=[];
+
+  blocks.forEach(function(block){
+    let round=rounds.find(function(candidate){
+      const used=candidate.reduce(function(all,match){return all.concat(match.players);},[]);
+      return block.every(function(playerIndex){return !used.includes(players[playerIndex]);});
+    });
+    if(!round){
+      round=[];
+      rounds.push(round);
+    }
+    round.push({
+      players:block.map(function(index){return players[index];}),
+      placements:{},
+      pointMode:4
+    });
+  });
+
+  return rounds.map(function(round,roundIndex){
+    return round.map(function(match,matchIndex){
+      return Object.assign({},match,{
+        id:'r'+roundIndex+'m'+matchIndex,
+        roundIndex:roundIndex,
+        matchIndex:matchIndex
+      });
+    });
+  });
 }
 
 function createSplitGroupSchedule(players,matchLimit){
@@ -9296,14 +9385,16 @@ renderBracket=function(){
   document.getElementById('roundBadge').textContent=names.length+'名 / '+totalMatches+'試合'+(hasSplitGroupMatches() ? ' / 2グループ' : '');
   document.getElementById('statRound').textContent=leagueRounds.length;
   document.getElementById('statRemain').textContent=Math.max(0,totalMatches-completedMatches);
-  document.getElementById('roundNote').textContent=hasSplitGroupMatches()
+  document.getElementById('roundNote').textContent=isLeague18Mode()
+    ? '18人全員が6試合に参加し、ほかの17人全員と最低1回対戦する組み合わせです。'
+    : hasSplitGroupMatches()
     ? (isDynamicEightGroupMode()
       ? 'A/Bの8人大乱闘です。Aの1〜4位は次回Bへ、Bの5〜8位は次回Aへ移動します。'
       : '参加者をA/Bの2グループに分け、同じグループ内だけで対戦カードを作成しています。')
     : '設定した合計試合数で'+getLeagueMatchSize()+'人マッチを作成しています。各マッチで順位を入力してください。';
   document.getElementById('zoomBracketBtn').style.display='none';
   document.querySelector('.zoom-view-toggle').style.display='none';
-  document.getElementById('addLeagueMatchBtn').style.display='';
+  document.getElementById('addLeagueMatchBtn').style.display=isLeague18Mode() ? 'none' : '';
 
   bracket.appendChild(createLeagueSummary(standings,totalMatches,completedMatches));
   bracket.appendChild(createStandingsSection(standings));
@@ -10119,6 +10210,7 @@ function createPersistedState(){
     leagueMatchLimit:leagueMatchLimit,
     splitGroupsEnabled:splitGroupsEnabled,
     leagueMatchSize:leagueMatchSize,
+    leagueScheduleMode:leagueScheduleMode,
     timerDurationSeconds:timerDurationSeconds,
     timerRemainingSeconds:timerRemainingSeconds,
     timerEndAt:timerEndAt,
@@ -10210,8 +10302,11 @@ function applyPersistedState(state){
   leagueMatchLimit=state.leagueMatchLimit || '';
   splitGroupsEnabled=Boolean(state.splitGroupsEnabled);
   leagueMatchSize=Number(state.leagueMatchSize)===8 ? 8 : 4;
-  if(competitionMode==='league'){
+  leagueScheduleMode=state.leagueScheduleMode==='all18' ? 'all18' : 'standard';
+  if(competitionMode==='league' && leagueScheduleMode!=='all18'){
     splitGroupsEnabled=true;
+  }else if(leagueScheduleMode==='all18'){
+    splitGroupsEnabled=false;
   }
   timerDurationSeconds=Number.isFinite(state.timerDurationSeconds) ? state.timerDurationSeconds : 70*60;
   timerRemainingSeconds=Number.isFinite(state.timerRemainingSeconds) ? state.timerRemainingSeconds : timerDurationSeconds;
@@ -10326,6 +10421,7 @@ function clearSavedData(){
   leagueMatchLimit='';
   splitGroupsEnabled=false;
   leagueMatchSize=4;
+  leagueScheduleMode='standard';
   timerDurationSeconds=70*60;
   timerRemainingSeconds=timerDurationSeconds;
   timerEndAt=null;
@@ -10367,6 +10463,7 @@ document.getElementById('modeLeagueBtn').addEventListener('click',function(){
 document.getElementById('modeLeague8Btn').addEventListener('click',function(){
   setLeaguePointMode(8);
 });
+document.getElementById('modeLeague18Btn').addEventListener('click',setLeague18Mode);
 document.getElementById('setupSingleElimBtn').addEventListener('click',function(){
   setEliminationMode('single');
 });
@@ -10381,6 +10478,15 @@ document.getElementById('registerModeLeagueBtn').addEventListener('click',functi
 });
 document.getElementById('registerModeLeague8Btn').addEventListener('click',function(){
   setLeaguePointMode(8);
+});
+document.getElementById('registerModeLeague18Btn').addEventListener('click',function(){
+  setLeague18Mode();
+  names=Array.from({length:18},function(_,index){
+    return names[index] || '参加者'+(index+1);
+  });
+  renderNames();
+  updateRegisterStats();
+  saveState();
 });
 document.getElementById('registerSingleElimBtn').addEventListener('click',function(){
   setEliminationMode('single');
