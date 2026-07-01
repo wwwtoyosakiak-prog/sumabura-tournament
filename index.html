@@ -8910,11 +8910,11 @@ function createSplitGroupSchedule(players,matchLimit){
   }
 
   const groups=createLeagueGroups(players);
-  const schedules=groups.map(function(group,index){
-    const groupLimit=matchLimit ? Math.max(1,Math.floor(matchLimit/groups.length)+(index<matchLimit%groups.length ? 1 : 0)) : null;
+  const matchesPerGroup=matchLimit ? Math.max(1,Math.ceil(matchLimit/groups.length)) : null;
+  const schedules=groups.map(function(group){
     return {
       name:group.name,
-      rounds:createRoundRobinSchedule(group.players,groupLimit)
+      rounds:createRoundRobinSchedule(group.players,matchesPerGroup)
     };
   });
   const maxRoundCount=schedules.reduce(function(max,schedule){
@@ -8942,8 +8942,10 @@ function createSplitGroupSchedule(players,matchLimit){
     }
   }
 
-  const minimumMatchCount=groups.length;
-  return matchLimit ? trimLeagueRounds(combined,Math.max(matchLimit,minimumMatchCount)) : combined;
+  const completeRoundMatchCount=matchLimit
+    ? Math.max(groups.length,Math.ceil(matchLimit/groups.length)*groups.length)
+    : null;
+  return completeRoundMatchCount ? trimLeagueRounds(combined,completeRoundMatchCount) : combined;
 }
 
 function createDynamicEightPlayerGroupSchedule(players,matchLimit){
@@ -9673,6 +9675,8 @@ function addLeagueMatchManually(){
 
   if(isDynamicEightGroupMode()){
     addDynamicEightGroupRound();
+  }else if(splitGroupsEnabled){
+    addSplitLeagueRound();
   }else{
     addSingleLeagueRound();
   }
@@ -9705,6 +9709,31 @@ function addDynamicEightGroupRound(){
 
   if(nextRound.length>0){
     leagueRounds.push(nextRound);
+  }
+}
+
+function addSplitLeagueRound(){
+  const nextIndex=leagueRounds.length;
+  const groups=createLeagueGroups(names);
+  const matches=[];
+
+  groups.forEach(function(group){
+    const schedule=createRoundRobinSchedule(group.players,nextIndex+1);
+    const sourceRound=schedule[nextIndex] || schedule[schedule.length-1] || [];
+    sourceRound.forEach(function(match){
+      matches.push(Object.assign({},match,{
+        id:'r'+nextIndex+'m'+matches.length,
+        roundIndex:nextIndex,
+        matchIndex:matches.length,
+        groupName:group.name,
+        pointMode:getLeagueMatchSize(),
+        placements:{}
+      }));
+    });
+  });
+
+  if(matches.length>0){
+    leagueRounds.push(matches);
   }
 }
 
