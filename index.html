@@ -5200,9 +5200,7 @@ function setCompetitionMode(mode){
 
 function setLeaguePointMode(matchSize){
   leagueMatchSize=matchSize===8 ? 8 : 4;
-  if(leagueMatchSize===8){
-    splitGroupsEnabled=true;
-  }
+  splitGroupsEnabled=true;
   setCompetitionMode('league');
 }
 
@@ -5316,7 +5314,7 @@ function updateModeUI(){
 
   if(splitGroupsToggle){
     splitGroupsToggle.checked=splitGroupsEnabled;
-    splitGroupsToggle.disabled=isLeague && matchSize===8;
+    splitGroupsToggle.disabled=isLeague;
   }
 
   if(formatNote){
@@ -5324,7 +5322,7 @@ function updateModeUI(){
       ? (splitGroupsEnabled
         ? (matchSize===8
           ? '8人ポイント制です。参加者をA/Bの2グループに分け、2試合同時に進行します。合計試合数が空欄なら、結果入力ごとに次の2試合を追加します。'
-          : 'エンジョイ大乱闘用です。参加者をA/Bの2グループに分け、同じグループ内で'+matchSize+'人マッチを作ります。')
+          : '4人ポイント制です。1回戦から参加者をA/Bの2グループに分け、2試合同時に進行します。')
         : 'エンジョイ大乱闘用です。合計試合数を入力してください。'+matchSize+'人マッチ、順位ポイントは'+getLeaguePointLabel(matchSize)+'です。')
       : (isDouble
         ? 'ダブルエリミネーション用です。1回負けると敗者側へ移動し、2回負けると敗退です。'
@@ -8944,7 +8942,8 @@ function createSplitGroupSchedule(players,matchLimit){
     }
   }
 
-  return matchLimit ? trimLeagueRounds(combined,matchLimit) : combined;
+  const minimumMatchCount=groups.length;
+  return matchLimit ? trimLeagueRounds(combined,Math.max(matchLimit,minimumMatchCount)) : combined;
 }
 
 function createDynamicEightPlayerGroupSchedule(players,matchLimit){
@@ -10182,7 +10181,7 @@ function applyPersistedState(state){
   leagueMatchLimit=state.leagueMatchLimit || '';
   splitGroupsEnabled=Boolean(state.splitGroupsEnabled);
   leagueMatchSize=Number(state.leagueMatchSize)===8 ? 8 : 4;
-  if(leagueMatchSize===8){
+  if(competitionMode==='league'){
     splitGroupsEnabled=true;
   }
   timerDurationSeconds=Number.isFinite(state.timerDurationSeconds) ? state.timerDurationSeconds : 70*60;
